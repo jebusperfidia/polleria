@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Provider;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Validator;
 
 class ProviderController extends Controller
@@ -87,20 +88,6 @@ class ProviderController extends Controller
     public function update(Request $request, $id)
     {
 
-        //dd($request);
-        //Validaciones
-        $validate = Validator::make($request->all(), [
-            'nombre' => 'required|string|max:100',
-            'rfc' => 'required|max:50|unique:providers'
-        ]);
-
-        //Si hay algún error de validación, enviar en formato JSON
-        if ($validate->fails()) {
-            return response()->json([
-                "errors" => $validate->errors()
-            ]);
-        }
-
         $validateid = Validator::make(['id' => $id], [
             'id' => 'required|numeric|integer'
         ]);
@@ -116,6 +103,23 @@ class ProviderController extends Controller
 
         //Validamos si el id recibido, es un proveedor válido
         if ($provider) {
+
+            //Validaciones
+            $validate = Validator::make($request->all(), [
+                'nombre' => 'required|string|max:100',
+                'rfc' => [
+                    'required',
+                    'max:50',
+                    Rule::unique('providers')->ignore($provider->id)]
+            ]);
+
+            //Si hay algún error de validación, enviar en formato JSON
+            if ($validate->fails()) {
+                return response()->json([
+                    "errors" => $validate->errors()
+                ]);
+            }
+
             //Si el proveedor es válido, intentamos generar el update
             //Si algo falla en el proceso, enviamos una respuesta
             if (!$provider->update($request->all())) {

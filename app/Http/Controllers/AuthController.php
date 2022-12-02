@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Validator;
 
 class AuthController extends Controller
@@ -168,11 +169,32 @@ class AuthController extends Controller
     public function update(Request $request, $id)
     {   
 
-        
-        //Validaciones
+        //Validamos el formato del id del usuario
+        $validateid = Validator::make(['id' => $id], [
+            'id' => 'required|numeric|integer'
+        ]);
+
+        //Si hay algún error de validación, enviar en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Buscamos el usuario mediante el id y generamos una colección
+        $user = User::find($id);
+
+        //Validamos si el id recibido, es un usuario válido
+        if($user){
+
+            //Realizamos una validación en los datos recibidos en el body
         $validate = Validator::make($request->all(), [
             'nombre' => 'required|string|max:100',
-            'usuario' => 'required|max:50|unique:users'
+            'usuario' => [
+            'required',
+            'max:50',
+                    //Validamos que el usuario no este tomado por otro usuario valga la redundancia, ignorando el usuario seleccionado
+            Rule::unique('users')->ignore($user->id)]
         ]);
 
         //Si hay algún error de validación, enviar en formato JSON
@@ -182,21 +204,6 @@ class AuthController extends Controller
             ]);
         }
 
-        $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
-        ]);
-
-        if ($validateid->fails()) {
-            return response()->json([
-                "errors" => $validateid->errors()
-            ]);
-        }
-        
-        //Buscamos el usuario mediante el id y generamos una colección
-        $user = User::find($id);
-
-        //Validamos si el id recibido, es un usuario válido
-        if($user){
             //Si el usuario es válido, intentamos generar el update
             //Si algo falla en el proceso, enviamos una respuesta
             if(!$user->update($request->all())) {

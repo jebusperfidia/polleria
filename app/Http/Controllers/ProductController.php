@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Validator;
 
 class ProductController extends Controller
@@ -91,24 +92,7 @@ class ProductController extends Controller
     public function update(Request $request, $id)
     {
 
-        
-        //Validaciones
-        $validate = Validator::make($request->all(), [
-            'barcode' => 'required|string|unique:products',
-            'nombre' => 'required|string|max:100',
-            'tipo' => 'required|numeric',
-            'stock' => 'required|numeric',
-            'producto_id' => 'required|exists:providers,id'
-
-        ]);
-
-        //Si hay algún error de validación, enviar en formato JSON
-        if ($validate->fails()) {
-            return response()->json([
-                "errors" => $validate->errors()
-            ]);
-        }
-
+        //Valiodamos el id del producto
         $validateid = Validator::make(['id' => $id], [
             'id' => 'required|numeric|integer'
         ]);
@@ -124,6 +108,28 @@ class ProductController extends Controller
 
         //Validamos si el id recibido, es un producto válido
         if ($product) {
+
+            //Si el producto existe, validamos la información recibida en el body
+            $validate = Validator::make($request->all(), [
+                'barcode' => [
+                    'required','string',
+                    //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
+                    Rule::unique('products')->ignore($product->id)
+                ],
+                'nombre' => 'required|string|max:100',
+                'tipo' => 'required|numeric',
+                'stock' => 'required|numeric',
+                'producto_id' => 'required|exists:providers,id'
+
+            ]);
+
+            //Si hay algún error de validación, enviar en formato JSON
+            if ($validate->fails()) {
+                return response()->json([
+                    "errors" => $validate->errors()
+                ]);
+            }
+
             //Si el producto es válido, intentamos generar el update
             //Si algo falla en el proceso, enviamos una respuesta
             if (!$product->update($request->all())) {
