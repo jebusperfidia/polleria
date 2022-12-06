@@ -212,7 +212,7 @@ class TicketController extends Controller
         //Validamos si el id recibido, es un Ticket válido
         if ($product) {
             return response()->json([
-                "status" => 1,
+                "status" => true,
                 "message" => "Datos encontrados con exito",
                 "ticket" => $product,
             ], 201);
@@ -220,7 +220,7 @@ class TicketController extends Controller
         //Ticket no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Producto no encontrado"
             ], 404);
         }
@@ -311,13 +311,13 @@ class TicketController extends Controller
             //Si todo fue correcto, enviamos una respuesta, en formato JSON
             if($ticketDelete){
                 return response()->json([
-                    "status" => 1,
+                    "status" => true,
                     "message" => "Ticket Eliminado con éxito",
                 ], 201);
             //Si no fue posible eliminar el ticket, enviamos una respuesta, en formato JSON
             } else {
                 return response()->json([
-                    "status" => 0,
+                    "status" => false,
                     "message" => "No fue posible eliminar el ticket"
                 ], 404);
             }
@@ -326,7 +326,7 @@ class TicketController extends Controller
         //Si el ticket no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "ticket no encontrado"
             ], 404);
         }

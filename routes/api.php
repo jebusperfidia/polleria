@@ -28,6 +28,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('user-show/{id}', [AuthController::class, 'show']);
     Route::put('user-update/{id}', [AuthController::class, 'update']);
     Route::delete('user-delete/{id}', [Authcontroller::class, 'destroy']);
+    Route::get('user-valid/{user}', [AuthController::class, 'validUser']);
+    Route::get('valid-token', [AuthController::class, 'validToken']);
     Route::get('logout', [AuthController::class, 'logout']);
 
     //Rutas para el controlador de proveedores
@@ -36,6 +38,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('provider-show/{id}', [ProviderController::class, 'show']);
     Route::put('provider-update/{id}', [ProviderController::class, 'update']);
     Route::delete('provider-delete/{id}', [Providercontroller::class, 'destroy']);
+    Route::get('rfc-valid/{rfc}', [Providercontroller::class, 'validRFC']);
+    Route::get('search/{search}', [Providercontroller::class, 'search']);
+
 
     //Rutas para el controlador de productos
     Route::get('products', [ProductController::class, 'index']);
@@ -43,6 +48,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('product-show/{id}', [ProductController::class, 'show']);
     Route::put('product-update/{id}', [ProductController::class, 'update']);
     Route::delete('product-delete/{id}', [ProductController::class, 'destroy']);
+    Route::get('barcode-valid/{barcode}', [ProductController::class, 'validBarcode']);
+
     
     //Rutas para el controlador de tickets
     Route::get('tickets', [TicketController::class, 'index']);

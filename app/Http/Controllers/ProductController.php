@@ -12,7 +12,7 @@ class ProductController extends Controller
     public function index()
     {
         return response()->json([
-            "status" => 1,
+            "status" => true,
             "products" => Product::all()
         ], 201);
     }
@@ -45,7 +45,7 @@ class ProductController extends Controller
 
         //Posteriormente, enviamos una respuesta, en formato JSON de la alta exitosa del producto
         return response()->json([
-            "status" => 1,
+            "status" => true,
             "message" => "Alta de producto exitosa",
             "product" => $product->nombre
         ], 201);
@@ -72,7 +72,7 @@ class ProductController extends Controller
         //Validamos si el id recibido, es un producto válido
         if ($product) {
             return response()->json([
-                "status" => 1,
+                "status" => true,
                 "message" => "Datos encontrados con exito",
                 "product" => $product
             ], 201);
@@ -80,7 +80,7 @@ class ProductController extends Controller
         //Producto no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Producto no encontrado"
             ], 404);
         }
@@ -134,14 +134,14 @@ class ProductController extends Controller
             //Si algo falla en el proceso, enviamos una respuesta
             if (!$product->update($request->all())) {
                 return response()->json([
-                    "status" => 0,
+                    "status" => false,
                     "message" => "No fue posible actualizar el producto"
                 ], 404);
             }
             //Si el update tuvo éxito, enviamos una respuesta
             else {
                 return response()->json([
-                    "status" => 1,
+                    "status" => true,
                     "message" => "Producto actualizado con éxito",
                     "producto" => $product
                 ], 201);
@@ -150,7 +150,7 @@ class ProductController extends Controller
         //Si el producto no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Producto no encontrado"
             ], 404);
         }
@@ -183,14 +183,14 @@ class ProductController extends Controller
             //Si algo falla en el proceso, enviamos una respuesta
             if (!$product->delete()) {
                 return response()->json([
-                    "status" => 0,
+                    "status" => false,
                     "message" => "No fue posible eliminar al producto"
                 ], 404);
             }
             //Si el update tuvo éxito, enviamos una respuesta
             else {
                 return response()->json([
-                    "status" => 1,
+                    "status" => true,
                     "message" => "producto eliminado con éxito",
                     "product" => $product
                 ], 201);
@@ -199,12 +199,33 @@ class ProductController extends Controller
         //Si el producto no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "producto no encontrado"
             ], 404);
         }
 
 
+    }
+
+    public function validBarcode($barcode){
+
+
+        $validateid = Validator::make(['barcode' => $barcode], [
+            'barcode' => 'required|string|unique:products',
+        ]);
+
+        if ($validateid->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Usuario no tomado regresamos respuesta de exito con estatus en false
+            return response()->json([
+                "status" => false,
+                "message" => "Barcode no tomado",
+            ], 201);
     }
 
 

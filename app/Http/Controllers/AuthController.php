@@ -42,7 +42,7 @@ class AuthController extends Controller
 
         //Posteriormente, enviamos una respuesta, en formato JSON de la alta exitosa del usuario
         return response()->json([
-            "status" => 1,
+            "status" => true,
             "message" => "Alta de usuario exitosa",
             "usuario" => $user->nombre
         ], 201);
@@ -77,14 +77,14 @@ class AuthController extends Controller
 
                 //Devolvemos una respuesta con el token de autenticación para futuras peticiones
                 return response()->json([
-                    "status" => 1,
+                    "status" => true,
                     "message" => "Usuario Logueado",
                     "auth_token" => $token
                 ], 201);
                 //Si el password no coincide, devolvemos una respuesta con un mensaje de error
             } else {
                 return response()->json([
-                    "status" => 0,
+                    "status" => false,
                     "message" => "Password incorrecto",
                 ], 404);
             }
@@ -92,7 +92,7 @@ class AuthController extends Controller
         //Si el usuario no está registrado, devolvemos una respuesta con un mensaje de error
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Usuario no registrado"
             ], 404);
         }
@@ -102,7 +102,7 @@ class AuthController extends Controller
     public function index(){
         //Obtenemos los datos 
         return response()->json([
-            "status" => 1,
+            "status" => true,
             "usuario" => User::all()
         ], 201);
     }
@@ -116,7 +116,7 @@ class AuthController extends Controller
 
         //Enviamos una respuesta exitosa
         return response()->json([
-            "status" => 1,
+            "status" => true,
             "message" => "Sesión cerrada exitosamente"
         ], 201);
     }
@@ -140,7 +140,7 @@ class AuthController extends Controller
         //Validamos si el id recibido, es un usuario válido
         if ($user) {
             return response()->json([
-                "status" => 1,
+                "status" => true,
                 "message" => "Datos encontrados con exito",
                 "usuario" => $user
             ], 201);
@@ -148,14 +148,14 @@ class AuthController extends Controller
         //Si el usuario no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Usuario no encontrado"
             ], 404);
         }
 
         //Obtenemos los datos del usuario autenticado
       /*   return response()->json([
-            "status" => 1,
+            "status" => true,
             "message" => "Acerca del perfil del usuario",
             "data" => [
                 "id" => auth()->user()->id,
@@ -208,14 +208,14 @@ class AuthController extends Controller
             //Si algo falla en el proceso, enviamos una respuesta
             if(!$user->update($request->all())) {
                 return response()->json([
-                    "status" => 0,
+                    "status" => false,
                     "message" => "No fue posible actualizar el usuario"
                 ], 404);
             }
             //Si el update tuvo éxito, enviamos una respuesta
             else {
                 return response()->json([
-                    "status" => 1,
+                    "status" => true,
                     "message" => "Usuario actualizado con éxito",
                     "usuario" => $user
                 ], 201);
@@ -224,7 +224,7 @@ class AuthController extends Controller
         //Si el usuario no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Usuario no encontrado"
             ], 404);
         }
@@ -255,14 +255,14 @@ class AuthController extends Controller
             //Si algo falla en el proceso, enviamos una respuesta
             if(!$user->delete()) {
                 return response()->json([
-                    "status" => 0,
+                    "status" => false,
                     "message" => "No fue posible eliminar al usuario"
                 ], 404);
             }
             //Si el update tuvo éxito, enviamos una respuesta
             else {
                 return response()->json([
-                    "status" => 1,
+                    "status" => true,
                     "message" => "Usuario eliminado con éxito",
                     "usuario" => $user
                 ], 201);
@@ -271,12 +271,42 @@ class AuthController extends Controller
         //Si el usuario no fue encontrado, enviamos una respuesta
         else {
             return response()->json([
-                "status" => 0,
+                "status" => false,
                 "message" => "Usuario no encontrado"
             ], 404);
         }
 
 
+    }
+
+
+    public function validToken() {
+        return response()->json([
+            "status" => true,
+            "message" => "Token validado con éxito",
+            "usuario" => auth()->user()->usuario
+        ], 201);
+    }
+
+    public function validUser($user){
+
+
+        $validateid = Validator::make(['usuario' => $user], [
+            'usuario' => 'required|max:50|unique:users',
+        ]);
+
+        if ($validateid->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Usuario no tomado regresamos respuesta de exito con estatus en false
+            return response()->json([
+                "status" => false,
+                "message" => "Usuario no tomado",
+            ], 201);
     }
 
 }
