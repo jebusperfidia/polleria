@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -15,13 +14,15 @@ return new class extends Migration
     {
         Schema::create('ticket_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('ticket_id');
-            $table->unsignedBigInteger('producto_id');
             $table->double('cantidad');
+            $table->double('kilos');
+            $table->double('subtotal');
+            $table->unsignedBigInteger('ticket_id');
+            $table->unsignedBigInteger('box_id');
             $table->timestamps();
 
             $table->foreign('ticket_id')->references('id')->on('tickets');
-            $table->foreign('producto_id')->references('id')->on('products');
+            $table->foreign('box_id')->references('id')->on('boxes');
         });
     }
 

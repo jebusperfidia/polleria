@@ -13,14 +13,16 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('tickets', function (Blueprint $table) {
+        Schema::create('boxes', function (Blueprint $table) {
             $table->id();
-            $table->integer('tipo');
-            $table->double('total');
-            $table->unsignedBigInteger('usuario_id');
+            $table->string('barcode');
+            $table->string('kilos_caja');
+            $table->integer('stock_cajas');
+            $table->integer('stock_tapas');
+            $table->unsignedBigInteger('producto_id');
             $table->timestamps();
 
-            $table->foreign('usuario_id')->references('id')->on('users');
+            $table->foreign('producto_id')->references('id')->on('products');
         });
     }
 
@@ -31,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tickets');
+        Schema::dropIfExists('boxes');
     }
 };

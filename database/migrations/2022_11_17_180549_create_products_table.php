@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id('id');
             $table->string('barcode', 150);
             $table->string('nombre', 150);
-            $table->integer('tipo');
-            $table->double('stock');
+            $table->double('costo_kilo');
+            $table->double('stock_kilos');
             $table->unsignedBigInteger('proveedor_id');
             $table->timestamps();
             $table->foreign('proveedor_id')->references('id')->on('providers');

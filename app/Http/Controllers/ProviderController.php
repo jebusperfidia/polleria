@@ -25,7 +25,7 @@ class ProviderController extends Controller
         //Validaciones
         $validate = Validator::make($request->all(), [
             'nombre' => 'required|string|max:100',
-            'rfc' => 'required|min:12|unique:providers'
+            'rfc' => 'required|min:12|max:13|unique:providers'
         ]);
 
         //Si hay algún error de validación, enviar en formato JSON
@@ -46,7 +46,8 @@ class ProviderController extends Controller
         return response()->json([
             "status" => true,
             "message" => "Alta de proveedor exitosa",
-            "provider" => $provider->nombre
+            "provider" => $provider->nombre,
+            "rfc" => $provider->rfc
         ], 201);
     }
     public function show($id)
@@ -107,7 +108,9 @@ class ProviderController extends Controller
                 'nombre' => 'required|string|max:100',
                 'rfc' => [
                     'required',
-                    'max:50',
+                    'string',
+                    'min:12',
+                    'max:13',
                     Rule::unique('providers')->ignore($provider->id)
                 ]
             ]);
@@ -195,7 +198,7 @@ class ProviderController extends Controller
     {
         //Validaciones
         $validate = Validator::make(['rfc' => $rfc], [
-            'rfc' => 'required|min:12|unique:providers'
+            'rfc' => 'required|string|min:12|max:13|unique:providers'
         ]);
 
         //Si hay algún error de validación, enviar en formato JSON

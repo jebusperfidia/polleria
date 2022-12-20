@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BoxController;
 use App\Http\Controllers\TicketController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -23,8 +24,8 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware(['auth:sanctum'])->group(function () {
     
     //Rutas para el controlador de usuarios
-    Route::post('user-register', [AuthController::class, 'store']);
     Route::get('users', [AuthController::class, 'index']);
+    Route::post('user-register', [AuthController::class, 'store']);
     Route::get('user-show/{id}', [AuthController::class, 'show']);
     Route::put('user-update/{id}', [AuthController::class, 'update']);
     Route::delete('user-delete/{id}', [Authcontroller::class, 'destroy']);
@@ -57,5 +58,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('ticket-show/{id}', [TicketController::class, 'show']);
     Route::delete('ticket-delete/{id}', [TicketController::class, 'destroy']);
     Route::get('product-detect/{bardcode}', [TicketController::class, 'detect']);
-    
+
+    //Rutas para el controlador cajas o boxes
+    Route::get('boxes', [BoxController::class, 'index']);
+    Route::post('box-register', [BoxController::class, 'store']);
+    Route::get('box-show/{id}', [BoxController::class, 'show']);
+    Route::put('box-update/{id}', [BoxController::class, 'update']);
+
+
 });

@@ -35,9 +35,14 @@ class TicketController extends Controller
 
         //Generamos las reglas para validar todos los campos dentro del objeto details
         $rules = [
-            'tipo' => 'required|numeric',
-            'details.*.producto_id' => 'required|numeric|exists:products,id',
-            'details.*.cantidad' => 'required|numeric'
+            'tipo' => 'required|numeric',,
+            'total' => 'required|numeric',
+            'details.*.barcode' => 'required|numeric|exists:products,id',
+            'details.*.costo_kilo' => 'requiered|numeric',
+            'details.*.kilos' => 'required|numeric',
+            'details.*.subtotal' => 'required|numeric',
+            'details.*.total_cajas' => 'requiered|numeric',
+            'details.*.total_tapas' => 'required|numeric'
         ];
 
 
