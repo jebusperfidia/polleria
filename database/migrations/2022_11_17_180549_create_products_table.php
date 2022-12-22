@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id('id');
-            $table->string('barcode', 150);
+            $table->string('barcode', 150)->unique();
             $table->string('nombre', 150);
             $table->double('costo_kilo');
             $table->double('stock_kilos');

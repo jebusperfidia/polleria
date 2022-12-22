@@ -15,8 +15,7 @@ return new class extends Migration
     {
         Schema::create('boxes', function (Blueprint $table) {
             $table->id();
-            $table->string('barcode');
-            $table->string('kilos_caja');
+            $table->string('barcode', 150)->unique();
             $table->integer('stock_cajas');
             $table->integer('stock_tapas');
             $table->unsignedBigInteger('producto_id');

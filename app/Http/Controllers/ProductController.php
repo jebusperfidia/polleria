@@ -126,8 +126,8 @@ class ProductController extends Controller
                 'barcode' => [
                     'required','string',
                     //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
-                    Rule::unique('products')->ignore($product->barcode),
-                    Rule::unique('boxex')->ignore($product->barcode)
+                    Rule::unique('products')->ignore($product->id),
+                    Rule::unique('boxes')->ignore($product->id)
                 ],
                 'nombre' => 'required|string|max:100'
 

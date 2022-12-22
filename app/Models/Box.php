@@ -18,7 +18,6 @@ class Box extends Model
 
        protected $fillable = [
         'barcode',
-        'kilos',
         'producto_id'
     ];
 }

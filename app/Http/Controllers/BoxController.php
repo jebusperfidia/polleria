@@ -107,7 +107,7 @@ class BoxController extends Controller
             else {
                 return response()->json([
                     "status" => true,
-                    "message" => "Caja actualizado con éxito",
+                    "message" => "Caja actualizada con éxito",
                     "caja" => $box
                 ], 201);
             }

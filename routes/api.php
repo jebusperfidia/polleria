@@ -20,12 +20,12 @@ use App\Http\Controllers\ProviderController;
 
 //Ruta para realizar el login de usuarios
 Route::post('login', [AuthController::class, 'login']);
+Route::post('user-register', [AuthController::class, 'store']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     
     //Rutas para el controlador de usuarios
     Route::get('users', [AuthController::class, 'index']);
-    Route::post('user-register', [AuthController::class, 'store']);
     Route::get('user-show/{id}', [AuthController::class, 'show']);
     Route::put('user-update/{id}', [AuthController::class, 'update']);
     Route::delete('user-delete/{id}', [Authcontroller::class, 'destroy']);
@@ -64,6 +64,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('box-register', [BoxController::class, 'store']);
     Route::get('box-show/{id}', [BoxController::class, 'show']);
     Route::put('box-update/{id}', [BoxController::class, 'update']);
+    Route::delete('box-delete/{id}', [BoxController::class, 'destroy']);
 
 
 });
