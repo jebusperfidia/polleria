@@ -62,7 +62,7 @@ class TicketController extends Controller
 
         //Hacemos las validaciones con los datos obtenidos desde el objeto request, y las reglas generadas anteriormente
         $validate = Validator::make($request->all(), $rules);
-        
+
         //Si hay algún error de validación, enviar en formato JSON
         if ($validate->fails()) {
             return response()->json([
@@ -92,36 +92,36 @@ class TicketController extends Controller
 
             //Refactorizamos la variable de $stockKilos para poder iterarlo
             $sk = [];
-            foreach($stockKilos as $stockKilo){
+            foreach ($stockKilos as $stockKilo) {
                 array_push($sk, $stockKilo);
             }
-            
+
             //Generamos una variable para almacenar los posibles problemas de stock
             $stocksValidation = [];
 
             //Validamos la cantidad de kilos
-            foreach($sk as $key => $value){
+            foreach ($sk as $key => $value) {
                 //Obtenemos el producto, a partir del código de barras, para obtener el total de kilos a comparar
-                $product = Product::where('barcode',$value['barcode'])->first();
+                $product = Product::where('barcode', $value['barcode'])->first();
                 //Primero validamos si hay stock en el inventario
                 if ($product->stock_kilos === 0.0) {
                     array_push(
                         $stocksValidation,
                         array(
-                            "id" => $product->id,
+                            "product_id" => $product->id,
                             "barcode" => $product->barcode,
                             "product" => $product->nombre,
                             "message" => "El stock de este producto es 0",
                             "faltante" => $value['kilos'] - $product->stock_kilos . ' kilos'
                         )
                     );
-                } 
+                }
                 //Si el stock es mayor que 0, validamos que se cuente con stock suficiente del producto
                 else if ($product->stock < $value['kilos']) {
                     array_push(
                         $stocksValidation,
                         array(
-                            "id" => $product->id,
+                            "product_id" => $product->id,
                             "barcode" => $product->barcode,
                             "product" => $product->nombre,
                             "message" => "No hay stock suficiente",
@@ -129,82 +129,73 @@ class TicketController extends Controller
                         )
                     );
                 }
-                //return $product;
             }
 
-            
-            return $stocksValidation;
+
+            //return $stocksValidation;
 
             /* Hasta aquí vamos, ya valida que tengamos inventario suficiente, falta validar el total de cajas alv */
 
             //Lo siguiente consiste en validar si se cuenta con cajas suficientes para el ticket a generar
             foreach ($request->details as $detail) {
-
-                //$product = Product::where('barcode', $detail['barcode'])->first();
-
                 $box = Box::where('barcode', $detail['barcode'])->first();
-
-                //if ($product) {
-                    //return 'soy un producto';
-                    //Primero validamos que el stock no sea igual a 0
-              /*       if ($product->stock_kilos === 0.0) {
-              
-                        array_push(
-                            $stocksValidation,
-                            array(
-                                "id" => $product['id'],
-                                "barcode" => $product['barcode'],
-                                "product" => $product->nombre,
-                                "message" => "El stock de este producto es 0",
-                                "faltante" => $detail['kilos'] - $product->stock_kilos . ' kilos'
-                            )
-                        );
-                        return $stocksValidation;
-                    } */
-
-                    //Si el stock es mayor que 0, validamos que se cuente con stock suficiente para la petición
-          /*           else if ($product->stock < $detail['cantidad']) {
-                        array_push(
-                            $stocksValidation,
-                            array(
-                                "id" => $detail['producto_id'],
-                                "product" => $product->nombre,
-                                "message" => "No hay stock suficiente",
-                                "faltante" => $detail['cantidad'] - $product->stock
-                            )
-                        );
-                    }
-                } */
-
                 if ($box) {
-                    print_r($box->barcode);
-                    //return  'soy una caja';
+                    //print_r($box->barcode);
                     //Primero validamos que el stock no sea igual a 0
                     if ($box->stock_cajas === 0) {
-                    array_push(
-                    $stocksValidation,
-                    array(
-                    "id" => $box->id,
-                    "barcode" => $box->barcode,
-                    "message" => "El stock para este producto es 0",
-                    "faltante" => $detail['cantidad'] - $product->stock
-                    )
-                    );
+                        //return 'no hay cajas mano';
+                        array_push(
+                            $stocksValidation,
+                            array(
+                                "box_id" => $box->id,
+                                "barcode" => $box->barcode,
+                                "message" => "El stock de cajas es de 0",
+                                "faltante" => $detail['total_cajas'] - $box->stock_cajas
+                            )
+                        );
                     }
-                   
+
                     //Si el stock es mayor que 0, validamos que se cuente con stock suficiente para la petición
-                    /*          else if ($product->stock < $detail['cantidad']) {
-                    array_push(
-                    $stocksValidation,
-                    array(
-                    "id" => $detail['producto_id'],
-                    "product" => $product->nombre,
-                    "message" => "No hay stock suficiente",
-                    "faltante" => $detail['cantidad'] - $product->stock
-                    )
-                    );
+                    else if ($box->stock_cajas < $detail['total_cajas']) {
+                        array_push(
+                            $stocksValidation,
+                            array(
+                                "box_id" => $box->id,
+                                "barcode" => $box->barcode,
+                                "message" => "No hay stock de cajas suficiente",
+                                "faltante" => $detail['total_cajas'] - $box->stock_cajas
+                            )
+                        );
                     }
-                    } */
+
+
+                    //print_r($box->barcode);
+                    //Primero validamos que el stock no sea igual a 0
+                    if ($box->stock_tapas === 0) {
+                        //return 'no hay cajas mano';
+                        array_push(
+                            $stocksValidation,
+                            array(
+                                "box_id" => $box->id,
+                                "barcode" => $box->barcode,
+                                "message" => "El stock de tapas es de 0",
+                                "faltante" => $detail['total_tapas'] - $product->stock_tapas
+                            )
+                        );
+                    }
+
+                    //Si el stock es mayor que 0, validamos que se cuente con stock suficiente para la petición
+                    else if ($box->stock_tapas < $detail['total_tapas']) {
+                        array_push(
+                            $stocksValidation,
+                            array(
+                                "box_id" => $box->id,
+                                "barcode" => $box->barcode,
+                                "message" => "No hay tapas suficiente",
+                                "faltante" => $detail['total_tapas'] - $box->stock_tapas
+                            )
+                        );
+                    }
                 }
 
             }
@@ -214,8 +205,9 @@ class TicketController extends Controller
             //Si existió algún problema con el stock de alguno de los productos, enviamos una respuesta en formato JSON
             if (count($stocksValidation) > 0) {
                 return response()->json([
+                    "status" => false,
                     "errors" => $stocksValidation
-                ]);
+                ], 404);
             }
 
         }
