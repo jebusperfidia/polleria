@@ -18,8 +18,8 @@ return new class extends Migration {
             $table->double('kilos');
             $table->double('costo_kilo');
             $table->double('subtotal');
-            $table->integer('cajas');
-            $table->integer('tapas');
+            $table->integer('total_cajas');
+            $table->integer('total_tapas');
             $table->unsignedBigInteger('ticket_id');
             $table->unsignedBigInteger('box_id')->nullable();
             $table->unsignedBigInteger('product_id')->nullable();

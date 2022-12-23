@@ -50,7 +50,7 @@ class TicketController extends Controller
                     }
                 }
             ],
-            'details.*.producto_id' => 'required|numeric|exists:products,id',
+            'details.*.product_id' => 'required|numeric|exists:products,id',
             'details.*.box_id' => 'numeric|exists:boxes,id',
             'details.*.kilos' => 'required|numeric',
             'details.*.costo_kilo' => 'required|numeric',
@@ -71,36 +71,40 @@ class TicketController extends Controller
         }
 
 
-        //Verificamos si el tipo de ticket, es una salida de inventario
-        if ($request->tipo === 2) {
-            //Validamos que existe stock suficiente del producto en las salidas
 
-            //Generamos una variable para obtener el total de kilos por producto, para verificar si se cuenta con suficiente stock
-            $stockKilos = [];
-            //Generamos un conjunto de arreglos para sumar el total de kilos por producto, para verificar si hay suficientes kilos
-            foreach ($request->details as $detail) {
-                foreach ($detail as $key => $value) {
-                    if ($key === 'producto_id') {
-                        if (array_key_exists($value, $stockKilos)) {
-                            $stockKilos[$value]['kilos'] = $stockKilos[$value]['kilos'] + $detail['kilos'];
-                        } else if ($key == 'producto_id') {
-                            $stockKilos[$value] = $detail;
-                        }
+
+        //Generamos una variable para obtener el total de kilos por producto, mismo que usaremos para la validación de stock, las entradas y salidas
+        $stockKilos = [];
+        //Generamos un conjunto de arreglos para sumar el total de kilos por producto
+        foreach ($request->details as $detail) {
+            foreach ($detail as $key => $value) {
+                if ($key === 'product_id') {
+                    if (array_key_exists($value, $stockKilos)) {
+                        $stockKilos[$value]['kilos'] = $stockKilos[$value]['kilos'] + $detail['kilos'];
+                    } else if ($key == 'product_id') {
+                        $stockKilos[$value] = $detail;
                     }
                 }
             }
+        }
 
-            //Refactorizamos la variable de $stockKilos para poder iterarlo
-            $sk = [];
-            foreach ($stockKilos as $stockKilo) {
-                array_push($sk, $stockKilo);
-            }
+        //Refactorizamos la variable de $stockKilos para poder iterarlo
+        $sk = [];
+        foreach ($stockKilos as $stockKilo) {
+            array_push($sk, $stockKilo);
+        }
 
+
+        //Verificamos si el tipo de ticket, es una salida de inventario
+        if ($request->tipo === 2) {
+            //Validamos que existe stock suficiente del producto en las salidas
+            //dd($sk);
             //Generamos una variable para almacenar los posibles problemas de stock
             $stocksValidation = [];
 
             //Validamos la cantidad de kilos
             foreach ($sk as $key => $value) {
+                
                 //Obtenemos el producto, a partir del código de barras, para obtener el total de kilos a comparar
                 $product = Product::where('barcode', $value['barcode'])->first();
                 //Primero validamos si hay stock en el inventario
@@ -117,7 +121,9 @@ class TicketController extends Controller
                     );
                 }
                 //Si el stock es mayor que 0, validamos que se cuente con stock suficiente del producto
-                else if ($product->stock < $value['kilos']) {
+                else if ($product->stock_kilos < $value['kilos']) {
+                    //dd($product->stock_kilos);
+                    //dd($product->stock, $value['kilos']);
                     array_push(
                         $stocksValidation,
                         array(
@@ -125,25 +131,18 @@ class TicketController extends Controller
                             "barcode" => $product->barcode,
                             "product" => $product->nombre,
                             "message" => "No hay stock suficiente",
-                            "faltante" => $value['kilos'] - $product->stock_kilos . ' de ' . $value['kilos'] . ' kilos'
+                            "faltante" =>  $value['kilos'] - $product->stock_kilos  . ' de ' . $value['kilos'] . ' kilos'
                         )
                     );
                 }
             }
 
-
-            //return $stocksValidation;
-
-            /* Hasta aquí vamos, ya valida que tengamos inventario suficiente, falta validar el total de cajas alv */
-
             //Lo siguiente consiste en validar si se cuenta con cajas suficientes para el ticket a generar
             foreach ($request->details as $detail) {
                 $box = Box::where('barcode', $detail['barcode'])->first();
                 if ($box) {
-                    //print_r($box->barcode);
                     //Primero validamos que el stock no sea igual a 0
                     if ($box->stock_cajas === 0) {
-                        //return 'no hay cajas mano';
                         array_push(
                             $stocksValidation,
                             array(
@@ -157,6 +156,7 @@ class TicketController extends Controller
 
                     //Si el stock es mayor que 0, validamos que se cuente con stock suficiente para la petición
                     else if ($box->stock_cajas < $detail['total_cajas']) {
+                        //dd($box->stock_cajas, $detail['total_cajas']);
                         array_push(
                             $stocksValidation,
                             array(
@@ -168,8 +168,7 @@ class TicketController extends Controller
                         );
                     }
 
-
-                    //print_r($box->barcode);
+                    //Finalmente, validaremos que se cuente con las tapas suficientes en el inventario
                     //Primero validamos que el stock no sea igual a 0
                     if ($box->stock_tapas === 0) {
                         //return 'no hay cajas mano';
@@ -200,8 +199,6 @@ class TicketController extends Controller
 
             }
 
-            //dd('vamos bien');
-
             //Si existió algún problema con el stock de alguno de los productos, enviamos una respuesta en formato JSON
             if (count($stocksValidation) > 0) {
                 return response()->json([
@@ -217,34 +214,77 @@ class TicketController extends Controller
         //Una vez obtenidos los datos, primero damos de alta el ticket
         $ticket = Ticket::create([
             'tipo' => $request->tipo,
+            'total' => $request->total,
             'usuario_id' => auth()->user()->id
         ]);
 
+
         //Si el ticket fue dado de alta, lo validamos y generamos los detalles del ticket
         if ($ticket) {
-            //Iteramos cada uno de los valores obtenidos en details
-            foreach ($request->details as $detail) {
-                //Generamos los datos restantes para la inserción en la base de datos
-                $detail['ticket_id'] = $ticket->id;
-                $detail['created_at'] = now();
-                $detail['updated_at'] = now();
-
-                //Obtenemos los datos del producto
-                $product = Product::find($detail['producto_id']);
-
-                //Mediante un if, validamos el tipo de ticket y actualizamos los datos del stock del producto
-                if ($ticket->tipo === 1) {
-                    $product->stock = $product->stock + $detail['cantidad'];
+        
+        //Validamos el tipo de ticket para verificar si es un ticket de entrada o salida de almacen
+        
+        //Si es una entrada de almacen, realizaremos el siguiente procedimiento
+        if($request->tipo === 1) {
+            //Utilizamos el arreglo con el total de kilos por producto, para sumarlos al stock actual    
+            foreach ($sk as $key => $value) {
+                    //Generamos una colección, usando el barcode del producto
+                    $product = Product::where('barcode', $value['barcode'])->first();
+                    //Sumamos los kilos recibidos en el ticket, al stock actual de la colección generada
+                    $product->stock_kilos = $product->stock_kilos + $value['kilos'];
+                    //Finalmente, actualizamos la colección, para reflejar los cambios en el registro de la base de datos
                     $product->save();
-                } else {
-                    $product->stock = $product->stock - $detail['cantidad'];
+                }
+                
+                //Mediante un foreach, recorreremos los datos recibidos desde la petición para registrar los detalles del ticket
+                //Aprovecharemos esta iteración de elementos, para actualzar los datos del stock de las cajas, de los barcode que sean pertenecientes a una caja
+                foreach($request->details as $detail) {
+                    //Lo primero será intentar generar una colección con el barcode recibido
+                    $box = Box::where('barcode', $detail['barcode'])->first();
+                    //Si el barcode, pertenece a una caja, actualizaremos los datos del stock de cajas y tapas
+                    if($box){
+                        //Actualizamos los datos del stock, de la colección generada, a partir de los datos recibidos en la petición
+                        $box->stock_cajas = $box->stock_cajas + $detail['total_cajas'];
+                        $box->stock_tapas = $box->stock_tapas + $detail['total_tapas'];
+                        //Finalmente, actualizamos la colección, para reflejar los cambios en el registro de la base de datos
+                        $box->save();
+                    }
+
+                    //Ahora, generaremos los datos necesarios para enviar los datos de los detalles del ticket
+                    $detail['ticket_id'] = $ticket->id;
+                    $detail['created_at'] = now();
+                    $detail['updated_at'] = now();
+                    //Insertamos el valor en la base de datos, en la tabla de ticketDetails
+                    TicketDetail::insert($detail);
+
+                }
+
+        }
+        else if ($request->tipo === 2) {
+            foreach ($sk as $key => $value) {
+                $product = Product::where('barcode', $value['barcode'])->first();
+                //dd('acá no hay error');
+                    $product->stock_kilos = $product->stock_kilos - $value['kilos'];
                     $product->save();
                 }
 
-                //Insertamos el valor en la base de datos, en la tabla de ticketDetails
-                TicketDetail::insert($detail);
-            }
+                foreach ($request->details as $detail) {
+                    $box = Box::where('barcode', $detail['barcode'])->first();
+                    if ($box) {
+                        $box->stock_cajas = $box->stock_cajas - $detail['total_cajas'];
+                        $box->stock_tapas = $box->stock_tapas - $detail['total_tapas'];
+                        $box->save();
+                    }
 
+                    //Ahora, generaremos los datos necesarios para enviar los datos de los detalles del ticket
+                    $detail['ticket_id'] = $ticket->id;
+                    $detail['created_at'] = now();
+                    $detail['updated_at'] = now();
+                    //Insertamos el valor en la base de datos, en la tabla de ticketDetails
+                    TicketDetail::insert($detail);
+                }
+                //dd("hasta aquí");
+        }
 
             //Obtenemos los datos detalles del ticket, registrados en la base de datos, a partir del id del ticket
             //Validando que los datos están registrados en la base de datos
