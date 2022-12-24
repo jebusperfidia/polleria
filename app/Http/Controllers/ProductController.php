@@ -64,7 +64,7 @@ class ProductController extends Controller
     {
         //Validamos el formato del id del producto
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:products,id'
         ]);
 
 
@@ -78,24 +78,12 @@ class ProductController extends Controller
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
 
-        //Validamos si existe alguna coincidencia de producto, con el id recibido
-        if ($product) {
-            //Si se obtuvo la información del producto, enviamos una respuesta, en formato JSON
-            return response()->json([
-                "status" => true,
-                "message" => "Datos encontrados con exito",
-                "product" => $product
-            ], 201);
-        }
-
-        //Si el producto no fue encontrado, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Producto no encontrado"
-            ], 404);
-        }
-
+        //Si se obtuvo la información del producto, enviamos una respuesta, en formato JSON
+        return response()->json([
+            "status" => true,
+            "message" => "Datos encontrados con exito",
+            "product" => $product
+        ], 201);
     }
 
     
@@ -105,7 +93,7 @@ class ProductController extends Controller
 
         //Validamos el formato del id del producto
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:products,id'
         ]);
 
         //Si hubo algún error de validación enviamos un respuesta, en formato JSON
@@ -117,9 +105,6 @@ class ProductController extends Controller
 
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
-
-        //Validamos si el id recibido, es un producto válido
-        if ($product) {
 
             //Si el producto existe, validamos la información recibida en el body
             $validate = Validator::make($request->all(), [
@@ -156,15 +141,7 @@ class ProductController extends Controller
                     "producto" => $product
                 ], 201);
             }
-        }
-        //Si el producto no fue encontrado, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Producto no encontrado"
-            ], 404);
-        }
-
+   
 
     }
 
@@ -173,7 +150,7 @@ class ProductController extends Controller
     {
         //Validamos el formato del id del producto
         $validate = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:products,id'
         ]);
 
 
@@ -186,8 +163,6 @@ class ProductController extends Controller
 
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
-        //Validamos si el id recibido, es un producto válido
-        if ($product) {
             //Si el producto es válido, intentamos generar el update
             //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
             if (!$product->delete()) {
@@ -204,15 +179,7 @@ class ProductController extends Controller
                     "product" => $product
                 ], 201);
             }
-        }
-        //Si el producto no fue encontrado, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "producto no encontrado"
-            ], 404);
-        }
-
+    
 
     }
 

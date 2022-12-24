@@ -90,7 +90,7 @@ class AuthController extends Controller
 
         //Validamos el formato del id del usuario
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:users,id'
         ]);
 
         if ($validateid->fails()) {
@@ -101,35 +101,13 @@ class AuthController extends Controller
 
         //Buscamos el usuario mediante el id y generamos una colección
         $user = User::find($id);
-
-        //Validamos si se encontró alguna coincidencia
-        if ($user) {
             //Si los datos fueron encontrados, enviamos una respuesta, en formato JSON
             return response()->json([
                 "status" => true,
                 "message" => "Datos encontrados con exito",
                 "usuario" => $user
             ], 201);
-        }
-        //Si el usuario no fue encontrado, enviamos una respuesta en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Usuario no encontrado"
-            ], 404);
-        }
-
-        //Obtenemos los datos del usuario autenticado
-        /*   return response()->json([
-        "status" => true,
-        "message" => "Acerca del perfil del usuario",
-        "data" => [
-        "id" => auth()->user()->id,
-        "nombre" => auth()->user()->nombre,
-        "usuario" => auth()->user()->usuario,
-        "created_at" => auth()->user()->created_at
-        ]
-        ], 201); */
+       
     }
 
     public function store(Request $request)
@@ -155,13 +133,6 @@ class AuthController extends Controller
         // Si las validaciones son correctas, se da de alta el usuario
         $user = User::create($request->all());
 
-        /*  $user = User::create([
-        'nombre' => $request->nombre,
-        'usuario' => $request->usuario,
-        'password' => Hash::make($request->password)
-        ]); */
-
-
         //Posteriormente, enviamos una respuesta, en formato JSON de la alta exitosa del usuario
         return response()->json([
             "status" => true,
@@ -176,7 +147,7 @@ class AuthController extends Controller
 
         //Validamos el formato del id del usuario
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:users,id'
         ]);
 
         //Si hay algún error de validación, enviamos una respuesta, en formato JSON
@@ -188,9 +159,6 @@ class AuthController extends Controller
 
         //Buscamos el usuario mediante el id y generamos una colección
         $user = User::find($id);
-
-        //Validamos si el id recibido, es un usuario válido
-        if ($user) {
 
             //Realizamos una validación en los datos recibidos en el body
             $validate = Validator::make($request->all(), [
@@ -227,15 +195,7 @@ class AuthController extends Controller
                     "usuario" => $user
                 ], 201);
             }
-        }
-        //Si el usuario no fue encontrado, enviamos una respuesta
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Usuario no encontrado"
-            ], 404);
-        }
-
+     
 
     }
 
@@ -244,7 +204,7 @@ class AuthController extends Controller
 
         //Validamos el formato del id del usuario
         $validate = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:users,id'
         ]);
 
 
@@ -258,8 +218,6 @@ class AuthController extends Controller
         //Buscamos el usuario mediante el id y generamos una colección
         $user = User::find($id);
 
-        //Validamos si el id recibido, es un usuario válido
-        if ($user) {
             //Si el usuario es válido, intentamos eliminar
             //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
             if (!$user->delete()) {
@@ -276,14 +234,6 @@ class AuthController extends Controller
                     "usuario" => $user
                 ], 201);
             }
-        }
-        //Si el usuario no fue encontrado, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Usuario no encontrado"
-            ], 404);
-        }
 
     }
 

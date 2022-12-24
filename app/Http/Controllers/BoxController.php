@@ -58,7 +58,7 @@ class BoxController extends Controller
 
         //Validamos el formato del id de la caja
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:boxes,id'
         ]);
 
         //Si hubo algún error de validación enviamos un respuesta, en formato JSON
@@ -70,9 +70,6 @@ class BoxController extends Controller
 
         //Buscamos la caja mediante el id y generamos una colección
         $box = Box::find($id);
-
-        //Validamos si el id recibido, es una caja registrada válida
-        if ($box) {
 
             //Si la caja existe, validamos la información recibida en el body
             $validate = Validator::make($request->all(), [
@@ -111,14 +108,6 @@ class BoxController extends Controller
                     "caja" => $box
                 ], 201);
             }
-        }
-        //Si la caja no fue encontrada, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Caja no encontrada"
-            ], 404);
-        }
 
     }
 
@@ -129,7 +118,7 @@ class BoxController extends Controller
 
         //Validamos el formato del id de la caja
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:boxes,id'
         ]);
 
         //Si hubo algún error de validación enviamos un respuesta, en formato JSON
@@ -142,22 +131,13 @@ class BoxController extends Controller
         //Buscamos la caja mediante el id y generamos una colección
         $box = Box::find($id);
 
-        //Validamos si existe alguna coincidencia de caja, con el id recibido
-        if ($box) {
             //Si se obtuvo la información de la caja, enviamos una respuesta, en formato JSON
             return response()->json([
                 "status" => true,
                 "message" => "Datos encontrados con exito",
                 "caja" => $box
             ], 201);
-        }
-        //Si la caja no fue encontrada, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "La caja no fue encontrada"
-            ], 404);
-        }
+  
 
     }
 
@@ -166,7 +146,7 @@ class BoxController extends Controller
     {
         //Validamos el formato del id de la caja
         $validate = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:boxes,id'
         ]);
 
 
@@ -179,8 +159,6 @@ class BoxController extends Controller
 
         //Buscamos la caja es válida mediante el id y generamos una colección
         $box = Box::find($id);
-        //Validamos si el id recibido, es una caja válida
-        if ($box) {
             //Si la caja es válida, intentamos generar el delete
             //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
             if (!$box->delete()) {
@@ -197,13 +175,5 @@ class BoxController extends Controller
                     "caja" => $box
                 ], 201);
             }
-        }
-        //Si la caja no fue encontrado, enviamos una respuesta, en formato JSON
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "La caja no fue encontrada"
-            ], 404);
-        }
     }
 }

@@ -55,7 +55,7 @@ class ProviderController extends Controller
 
 
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:providers,id'
         ]);
 
         if ($validateid->fails()) {
@@ -67,28 +67,18 @@ class ProviderController extends Controller
         //Buscamos el proveedor mediante el id y generamos una colección
         $provider = Provider::find($id);
 
-        //Validamos si el id recibido, es un proveedor válido
-        if ($provider) {
-            return response()->json([
-                "status" => true,
-                "message" => "Datos encontrados con exito",
-                "provider" => $provider
-            ], 201);
-        }
-        //proveedor no fue encontrado, enviamos una respuesta
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "proveedor no encontrado"
-            ], 404);
-        }
+        return response()->json([
+            "status" => true,
+            "message" => "Datos encontrados con exito",
+            "provider" => $provider
+        ], 201);
     }
 
     public function update(Request $request, $id)
     {
 
         $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:providers,id'
         ]);
 
         if ($validateid->fails()) {
@@ -99,10 +89,6 @@ class ProviderController extends Controller
 
         //Buscamos el proveedor mediante el id y generamos una colección
         $provider = Provider::find($id);
-
-        //Validamos si el id recibido, es un proveedor válido
-        if ($provider) {
-
             //Validaciones
             $validate = Validator::make($request->all(), [
                 'nombre' => 'required|string|max:100',
@@ -138,21 +124,14 @@ class ProviderController extends Controller
                     "provider" => $provider
                 ], 201);
             }
-        }
-        //Si el proveedor no fue encontrado, enviamos una respuesta
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Proveedor no encontrado"
-            ], 404);
-        }
+  
     }
 
     public function destroy($id)
     {
 
         $validate = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer'
+            'id' => 'required|numeric|integer|exists:providers,id'
         ]);
 
 
@@ -165,9 +144,6 @@ class ProviderController extends Controller
 
         //Buscamos el proveedor mediante el id y generamos una colección
         $provider = Provider::find($id);
-        //Validamos si el id recibido, es un proveedor válido
-        if ($provider) {
-            //dd($user);
             //Si el proveedor es válido, intentamos generar el update
             //Si algo falla en el proceso, enviamos una respuesta
             if (!$provider->delete()) {
@@ -184,14 +160,6 @@ class ProviderController extends Controller
                     "provider" => $provider
                 ], 201);
             }
-        }
-        //Si el proveedor no fue encontrado, enviamos una respuesta
-        else {
-            return response()->json([
-                "status" => false,
-                "message" => "Proveedor no encontrado"
-            ], 404);
-        }
     }
 
     public function validRFC($rfc)
