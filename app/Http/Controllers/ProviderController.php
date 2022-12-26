@@ -184,6 +184,34 @@ class ProviderController extends Controller
         ], 201);
     }
 
+    public function validRfcUpdate($rfc, $id)
+    {
+        //Validaciones
+        $validate = Validator::make(['rfc' => $rfc], [
+            'rfc' => [
+                'required',
+                'string',
+                'min:12',
+                'max:13',
+                Rule::unique('providers')->ignore($id)
+            ]
+        ]);
+
+        //Si hay algún error de validación, enviar en formato JSON
+        if ($validate->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validate->errors()
+            ]);
+        }
+
+        //Posteriormente, enviamos una respuesta, en formato JSON de la alta exitosa del proveedor
+        return response()->json([
+            "status" => false,
+            "message" => "RFC no registrado"
+        ], 201);
+    }
+
     public function search($search)
     {
         $providers = Provider::where('nombre', 'LIKE', "%{$search}%")->get();

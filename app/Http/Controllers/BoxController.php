@@ -137,7 +137,7 @@ class BoxController extends Controller
                 "message" => "Datos encontrados con exito",
                 "caja" => $box
             ], 201);
-  
+
 
     }
 
@@ -176,4 +176,60 @@ class BoxController extends Controller
                 ], 201);
             }
     }
+
+    public function validBarcode($barcode){
+
+        //Validamos el formato del id del producto
+        $validateid = Validator::make(['barcode' => $barcode], [
+            'barcode' => [
+                'required',
+                'string',
+                Rule::unique('boxes'),
+                Rule::unique('products')
+            ],
+        ]);
+
+        //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Usuario no tomado regresamos respuesta de exito con estatus en false, en formato JSON
+            return response()->json([
+                "status" => false,
+                "message" => "Barcode no tomado",
+            ], 201);
+    }
+
+    public function validBarcodeUpdate($barcode){
+
+        //Validamos el formato del id del producto
+        $validateid = Validator::make(['barcode' => $barcode], [
+            'barcode' => [
+                'required',
+                'string',
+                //Validamos que el barcode no este tomado por otro producto o caja, ignorando la caja seleccionada
+                Rule::unique('boxes')->ignore($barcode),
+                Rule::unique('products')->ignore($barcode)
+            ],
+        ]);
+
+        //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Usuario no tomado regresamos respuesta de exito con estatus en false, en formato JSON
+            return response()->json([
+                "status" => false,
+                "message" => "Barcode no tomado",
+            ], 201);
+    }
+
 }

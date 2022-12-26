@@ -10,7 +10,7 @@ use Validator;
 class ProductController extends Controller
 {
     public function index()
-    {   
+    {
         //Enviamos una respuesta de todos los productos registrados, en formato JSON
         return response()->json([
             "status" => true,
@@ -23,7 +23,7 @@ class ProductController extends Controller
     {
         //Validaciones
         $validate = Validator::make($request->all(), [
-            'barcode' => 
+            'barcode' =>
             [
                 'required',
                 'string',
@@ -86,7 +86,7 @@ class ProductController extends Controller
         ], 201);
     }
 
-    
+
 
     public function update(Request $request, $id)
     {
@@ -141,7 +141,7 @@ class ProductController extends Controller
                     "producto" => $product
                 ], 201);
             }
-   
+
 
     }
 
@@ -179,7 +179,7 @@ class ProductController extends Controller
                     "product" => $product
                 ], 201);
             }
-    
+
 
     }
 
@@ -189,7 +189,7 @@ class ProductController extends Controller
         $validateid = Validator::make(['barcode' => $barcode], [
             'barcode' => 'required|string|unique:products',
         ]);
-        
+
         //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
         if ($validateid->fails()) {
             return response()->json([
@@ -203,6 +203,12 @@ class ProductController extends Controller
                 "status" => false,
                 "message" => "Barcode no tomado",
             ], 201);
+    }
+
+    public function search($search)
+    {
+        $products = Product::where('nombre', 'LIKE', "%{$search}%")->get();
+        return response()->json($products, 201);
     }
 
 
