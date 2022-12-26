@@ -77,8 +77,8 @@ class BoxController extends Controller
                     'required',
                     'string',
                     //Validamos que el barcode no este tomado por otro producto o caja, ignorando la caja seleccionada
-                    Rule::unique('products')->ignore($box->id),
-                    Rule::unique('boxes')->ignore($box->barcode)
+                    Rule::unique('boxes')->ignore($box->id),
+                    Rule::unique('products')->ignore($box->barcode)
                 ],
                 //Validamos que exista el id del producto para el registro de la caja
                 'producto_id' => 'required|numeric|exists:products,id'
