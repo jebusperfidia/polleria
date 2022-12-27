@@ -28,6 +28,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('users', [AuthController::class, 'index']);
     Route::get('user-show/{id}', [AuthController::class, 'show']);
     Route::put('user-update/{id}', [AuthController::class, 'update']);
+    Route::put('user-update-password/{id}', [AuthController::class, 'updatePassword']);
     Route::delete('user-delete/{id}', [Authcontroller::class, 'destroy']);
     Route::get('user-valid/{user}', [AuthController::class, 'validUser']);
     Route::get('valid-token', [AuthController::class, 'validToken']);

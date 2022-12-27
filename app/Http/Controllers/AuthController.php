@@ -84,32 +84,6 @@ class AuthController extends Controller
         ], 201);
     }
 
-
-    public function show($id)
-    {
-
-        //Validamos el formato del id del usuario
-        $validateid = Validator::make(['id' => $id], [
-            'id' => 'required|numeric|integer|exists:users,id'
-        ]);
-
-        if ($validateid->fails()) {
-            return response()->json([
-                "errors" => $validateid->errors()
-            ]);
-        }
-
-        //Buscamos el usuario mediante el id y generamos una colección
-        $user = User::find($id);
-            //Si los datos fueron encontrados, enviamos una respuesta, en formato JSON
-            return response()->json([
-                "status" => true,
-                "message" => "Datos encontrados con exito",
-                "usuario" => $user
-            ], 201);
-       
-    }
-
     public function store(Request $request)
     {
         //Validaciones
@@ -139,6 +113,33 @@ class AuthController extends Controller
             "message" => "Alta de usuario exitosa",
             "usuario" => $user->nombre
         ], 201);
+    }
+
+
+
+    public function show($id)
+    {
+
+        //Validamos el formato del id del usuario
+        $validateid = Validator::make(['id' => $id], [
+            'id' => 'required|numeric|integer|exists:users,id'
+        ]);
+
+        if ($validateid->fails()) {
+            return response()->json([
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Buscamos el usuario mediante el id y generamos una colección
+        $user = User::find($id);
+            //Si los datos fueron encontrados, enviamos una respuesta, en formato JSON
+            return response()->json([
+                "status" => true,
+                "message" => "Datos encontrados con exito",
+                "usuario" => $user
+            ], 201);
+       
     }
 
 
@@ -198,6 +199,54 @@ class AuthController extends Controller
      
 
     }
+
+    public function updatePassword(Request $request, $id){
+
+        //Validamos el formato del id del usuario
+        $validateid = Validator::make(['id' => $id], [
+            'id' => 'required|numeric|integer|exists:users,id'
+        ]);
+
+        //Si hay algún error de validación, enviamos una respuesta, en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Realizamos una validación en los datos recibidos en el body
+        $validate = Validator::make($request->all(), [
+            'password' => 'required|confirmed|string|min:8',
+        ]);
+
+        //Si hay algún error de validación, enviamos una respuesta, en formato JSON
+        if ($validate->fails()) {
+            return response()->json([
+                "errors" => $validate->errors()
+            ]);
+        }
+
+        //Buscamos el usuario mediante el id y generamos una colección
+        $user = User::find($id);
+
+        if (!($user->update(['password'=> Hash::make($request->password)]))) {
+                  return response()->json([
+                    "status" => false,
+                    "message" => "No fue posible actualizar el password"
+                ], 404);
+            }
+            //Si el update tuvo éxito, enviamos una respuesta en formato JSON
+            else {
+                return response()->json([
+                    "status" => true,
+                    "message" => "Password actualizado con éxito",
+                    "usuario" => $user
+                ], 201);
+            }
+    }
+
+
+
 
     public function destroy($id)
     {
