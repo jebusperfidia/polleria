@@ -179,7 +179,7 @@ class BoxController extends Controller
 
     public function validBarcode($barcode){
 
-        //Validamos el formato del id del producto
+        //Validamos el formato del barcode del producto
         $validateid = Validator::make(['barcode' => $barcode], [
             'barcode' => [
                 'required',
@@ -204,24 +204,27 @@ class BoxController extends Controller
             ], 201);
     }
 
-    public function validBarcodeUpdate($barcode){
+    public function validBarcodeUpdate($barcode, $id){
 
-        //Validamos el formato del id del producto
-        $validateid = Validator::make(['barcode' => $barcode], [
-            'barcode' => [
-                'required',
-                'string',
-                //Validamos que el barcode no este tomado por otro producto o caja, ignorando la caja seleccionada
-                Rule::unique('boxes')->ignore($barcode),
-                Rule::unique('products')->ignore($barcode)
-            ],
-        ]);
+        //Buscamos la caja mediante el id y generamos una colección
+        $box = Box::find($id);
+
+            //Si la caja existe, validamos el barcode
+            $validate = Validator::make(['barcode' => $barcode], [
+                'barcode' => [
+                    'required',
+                    'string',
+                    //Validamos que el barcode no este tomado por otro producto o caja, ignorando la caja seleccionada
+                    Rule::unique('boxes')->ignore($id),
+                    Rule::unique('products')->ignore($box->barcode)
+                ],
+            ]);
 
         //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
-        if ($validateid->fails()) {
+        if ($validate->fails()) {
             return response()->json([
                 "status" => true,
-                "errors" => $validateid->errors()
+                "errors" => $validate->errors()
             ]);
         }
 

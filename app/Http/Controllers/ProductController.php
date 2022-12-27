@@ -10,7 +10,7 @@ use Validator;
 class ProductController extends Controller
 {
     public function index()
-    {   
+    {
         //Enviamos una respuesta de todos los productos registrados, en formato JSON
         return response()->json([
             "status" => true,
@@ -23,7 +23,7 @@ class ProductController extends Controller
     {
         //Validaciones
         $validate = Validator::make($request->all(), [
-            'barcode' => 
+            'barcode' =>
             [
                 'required',
                 'string',
@@ -57,7 +57,6 @@ class ProductController extends Controller
             "message" => "Alta de producto exitosa",
             "product" => $product->nombre
         ], 201);
-
     }
 
     public function show($id)
@@ -86,7 +85,7 @@ class ProductController extends Controller
         ], 201);
     }
 
-    
+
 
     public function update(Request $request, $id)
     {
@@ -106,43 +105,41 @@ class ProductController extends Controller
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
 
-            //Si el producto existe, validamos la información recibida en el body
-            $validate = Validator::make($request->all(), [
-                'barcode' => [
-                    'required','string',
-                    //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
-                    Rule::unique('products')->ignore($product->id),
-                    Rule::unique('boxes')->ignore($product->barcode)
-                ],
-                'nombre' => 'required|string|max:100'
+        //Si el producto existe, validamos la información recibida en el body
+        $validate = Validator::make($request->all(), [
+            'barcode' => [
+                'required', 'string',
+                //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
+                Rule::unique('products')->ignore($product->id),
+                Rule::unique('boxes')->ignore($product->barcode)
+            ],
+            'nombre' => 'required|string|max:100'
 
+        ]);
+
+        //Si hay algún error de validación enviamos una respuesta, en formato JSON
+        if ($validate->fails()) {
+            return response()->json([
+                "errors" => $validate->errors()
             ]);
+        }
 
-            //Si hay algún error de validación enviamos una respuesta, en formato JSON
-            if ($validate->fails()) {
-                return response()->json([
-                    "errors" => $validate->errors()
-                ]);
-            }
-
-            //Si el producto es válido, intentamos generar el update
-            //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
-            if (!$product->update($request->all())) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "No fue posible actualizar el producto"
-                ], 404);
-            }
-            //Si el update tuvo éxito, enviamos una respuesta, en formato JSON
-            else {
-                return response()->json([
-                    "status" => true,
-                    "message" => "Producto actualizado con éxito",
-                    "producto" => $product
-                ], 201);
-            }
-   
-
+        //Si el producto es válido, intentamos generar el update
+        //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
+        if (!$product->update($request->all())) {
+            return response()->json([
+                "status" => false,
+                "message" => "No fue posible actualizar el producto"
+            ], 404);
+        }
+        //Si el update tuvo éxito, enviamos una respuesta, en formato JSON
+        else {
+            return response()->json([
+                "status" => true,
+                "message" => "Producto actualizado con éxito",
+                "producto" => $product
+            ], 201);
+        }
     }
 
 
@@ -163,47 +160,75 @@ class ProductController extends Controller
 
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
-            //Si el producto es válido, intentamos generar el update
-            //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
-            if (!$product->delete()) {
-                return response()->json([
-                    "status" => false,
-                    "message" => "No fue posible eliminar al producto"
-                ], 404);
-            }
-            //Si el update tuvo éxito, enviamos una respuesta, en formato JSON
-            else {
-                return response()->json([
-                    "status" => true,
-                    "message" => "producto eliminado con éxito",
-                    "product" => $product
-                ], 201);
-            }
-    
-
-    }
-
-    public function validBarcode($barcode){
-
-        //Validamos el formato del id del producto
-        $validateid = Validator::make(['barcode' => $barcode], [
-            'barcode' => 'required|string|unique:products',
-        ]);
-        
-        //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
-        if ($validateid->fails()) {
+        //Si el producto es válido, intentamos generar el update
+        //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
+        if (!$product->delete()) {
+            return response()->json([
+                "status" => false,
+                "message" => "No fue posible eliminar al producto"
+            ], 404);
+        }
+        //Si el update tuvo éxito, enviamos una respuesta, en formato JSON
+        else {
             return response()->json([
                 "status" => true,
-                "errors" => $validateid->errors()
+                "message" => "producto eliminado con éxito",
+                "product" => $product
+            ], 201);
+        }
+    }
+
+    public function validBarcode($barcode)
+    {
+
+        //Validamos el formato del id del producto
+        $validate = Validator::make(['barcode' => $barcode], [
+            'barcode' => 'required|string|unique:products',
+        ]);
+
+        //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
+        if ($validate->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validate->errors()
             ]);
         }
 
         //Usuario no tomado regresamos respuesta de exito con estatus en false, en formato JSON
-            return response()->json([
-                "status" => false,
-                "message" => "Barcode no tomado",
-            ], 201);
+        return response()->json([
+            "status" => false,
+            "message" => "Barcode no tomado",
+        ], 201);
     }
 
+    public function validBarcodeUpdate($barcode, $id)
+    {
 
+        //Buscamos el producto mediante el id y generamos una colección
+        $product = Product::find($id);
+
+        //Si el producto existe, validamos el barcode
+        $validate = Validator::make(['barcode' => $barcode], [
+            'barcode' => [
+                'required', 'string',
+                //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
+                Rule::unique('products')->ignore($product->id),
+                Rule::unique('boxes')->ignore($product->barcode)
+            ]
+        ]);
+
+        //Si hubo algún error de validación, enviamos una respuesta, en formato JSON
+        if ($validate->fails()) {
+            return response()->json([
+                "status" => true,
+                "errors" => $validate->errors()
+            ]);
+        }
+
+        //Usuario no tomado regresamos respuesta de exito con estatus en false, en formato JSON
+        return response()->json([
+            "status" => false,
+            "message" => "Barcode no tomado",
+        ], 201);
+    }
 }

@@ -51,6 +51,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('product-update/{id}', [ProductController::class, 'update']);
     Route::delete('product-delete/{id}', [ProductController::class, 'destroy']);
     Route::get('barcode-valid/{barcode}', [ProductController::class, 'validBarcode']);
+    Route::get('barcode-valid-update/{barcode}/{id}', [ProductController::class, 'validBarcodeUpdate']);
     Route::get('search-product/{search}', [ProductController::class, 'search']);
 
 
