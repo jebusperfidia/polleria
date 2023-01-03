@@ -231,4 +231,37 @@ class ProductController extends Controller
             "message" => "Barcode no tomado",
         ], 201);
     }
+
+    public function showBarcode($barcode)
+    {
+        //Validamos el formato del barcode del producto
+        $validateid = Validator::make(['barcode' => $barcode], [
+            'barcode' => 'required|string|exists:products,barcode'
+        ]);
+
+
+        //Si hubo algún error de validación enviamos un respuesta, en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "status" => false,
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Buscamos el producto mediante el barcode y generamos una colección
+        $product = Product::where('barcode', $barcode)->first();
+
+        //Si se obtuvo la información del producto, enviamos una respuesta, en formato JSON
+        return response()->json([
+            "status" => true,
+            "message" => "Datos encontrados con exito",
+            "product" => $product
+        ], 201);
+    }
+
+    public function search($search)
+    {
+        $products = Product::where('nombre', 'LIKE', "%{$search}%")->get();
+        return response()->json($products, 201);
+    }
 }

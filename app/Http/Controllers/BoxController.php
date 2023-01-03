@@ -235,4 +235,33 @@ class BoxController extends Controller
             ], 201);
     }
 
+    public function showBarcode($barcode)
+    {
+
+        //Validamos el formato del barcode de la caja
+        $validateid = Validator::make(['barcode' => $barcode], [
+            'barcode' => 'required|string|exists:boxes,barcode'
+        ]);
+
+        //Si hubo algún error de validación enviamos un respuesta, en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "status" => false,
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Buscamos la caja mediante el barcode y generamos una colección
+        $box = Box::where('barcode', $barcode)->first();
+
+            //Si se obtuvo la información de la caja, enviamos una respuesta, en formato JSON
+            return response()->json([
+                "status" => true,
+                "message" => "Datos encontrados con exito",
+                "caja" => $box
+            ], 201);
+
+
+    }
+
 }

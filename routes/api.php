@@ -48,6 +48,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('products', [ProductController::class, 'index']);
     Route::post('product-register', [ProductController::class, 'store']);
     Route::get('product-show/{id}', [ProductController::class, 'show']);
+    Route::get('product-show-barcode/{barcode}', [ProductController::class, 'showBarcode']);
     Route::put('product-update/{id}', [ProductController::class, 'update']);
     Route::delete('product-delete/{id}', [ProductController::class, 'destroy']);
     Route::get('barcode-valid/{barcode}', [ProductController::class, 'validBarcode']);
@@ -67,6 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('boxes', [BoxController::class, 'index']);
     Route::post('box-register', [BoxController::class, 'store']);
     Route::get('box-show/{id}', [BoxController::class, 'show']);
+    Route::get('box-show-barcode/{barcode}', [BoxController::class, 'showBarcode']);
     Route::put('box-update/{id}', [BoxController::class, 'update']);
     Route::delete('box-delete/{id}', [BoxController::class, 'destroy']);
     Route::get('box-barcode-valid/{barcode}', [BoxController::class, 'validBarcode']);
