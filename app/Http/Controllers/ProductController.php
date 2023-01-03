@@ -160,24 +160,26 @@ class ProductController extends Controller
 
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
-        //Si el producto es válido, intentamos generar el update
-        //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
-        if (!$product->delete()) {
-            return response()->json([
-                "status" => false,
-                "message" => "No fue posible eliminar al producto"
-            ], 404);
-        }
-        //Si el update tuvo éxito, enviamos una respuesta, en formato JSON
-        else {
+
+          try {
+            $product->delete();
+
             return response()->json([
                 "status" => true,
-                "message" => "producto eliminado con éxito",
-                "product" => $product
+                "message" => "Producto eliminado con éxito",
+                "producto" => $product
             ], 201);
+        } catch (\Exception $e) {
+            if ($e->getCode() == "23000") {
+                return response()->json([
+                    "status" => false,
+                    "message" => "No fue posible eliminar el producto, tiene movimientos generados"
+                ], 404);
+            }
         }
-    }
-
+  
+    } 
+        
     public function validBarcode($barcode)
     {
 

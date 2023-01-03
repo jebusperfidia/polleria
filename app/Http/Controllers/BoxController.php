@@ -159,22 +159,23 @@ class BoxController extends Controller
 
         //Buscamos la caja es válida mediante el id y generamos una colección
         $box = Box::find($id);
-            //Si la caja es válida, intentamos generar el delete
-            //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
-            if (!$box->delete()) {
+
+        try {
+            $box->delete();
+            return response()->json([
+                "status" => true,
+                "message" => "Caja eliminada con éxito",
+                "caja" => $box
+            ], 201);
+        } catch (\Exception $e) {
+            if ($e->getCode() == "23000") {
                 return response()->json([
                     "status" => false,
-                    "message" => "No fue posible eliminar la caja"
+                    "message" => "No fue posible eliminar la caja, tiene productos registrados o movimientos generados"
                 ], 404);
             }
-            //Si el update tuvo éxito, enviamos una respuesta, en formato JSON
-            else {
-                return response()->json([
-                    "status" => true,
-                    "message" => "La caja fue eliminada con éxito",
-                    "caja" => $box
-                ], 201);
-            }
+        }
+            
     }
 
     public function validBarcode($barcode){

@@ -144,22 +144,22 @@ class ProviderController extends Controller
 
         //Buscamos el proveedor mediante el id y generamos una colección
         $provider = Provider::find($id);
-            //Si el proveedor es válido, intentamos generar el update
-            //Si algo falla en el proceso, enviamos una respuesta
-            if (!$provider->delete()) {
+
+        try {
+            $provider->delete();
+            return response()->json([
+                "status" => true,
+                "message" => "Proveedor eliminado con éxito",
+                "proveedor" => $provider
+            ], 201);
+        } catch (\Exception $e) {
+            if ($e->getCode() == "23000") {
                 return response()->json([
                     "status" => false,
-                    "message" => "No fue posible eliminar al proveedor"
+                    "message" => "No fue posible eliminar al proveedor, tiene productos registrados"
                 ], 404);
             }
-            //Si el update tuvo éxito, enviamos una respuesta
-            else {
-                return response()->json([
-                    "status" => true,
-                    "message" => "Proveedor eliminado con éxito",
-                    "provider" => $provider
-                ], 201);
-            }
+        }
     }
 
     public function validRFC($rfc)
