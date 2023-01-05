@@ -109,8 +109,10 @@ class TicketController extends Controller
             foreach ($sk as $key => $value) {
 
                 //Obtenemos el producto, a partir del código de barras, para obtener el total de kilos a comparar
-                $product = Product::where('barcode', $value['barcode'])->first();
+                //$product = Product::where('barcode', $value['barcode'])->first();
+                $product = Product::find($value['product_id']);
                 //Primero validamos si hay stock en el inventario
+                //dd($product);
 
                 if($product) {
                     if ($product->stock_kilos === 0.0) {
@@ -208,6 +210,15 @@ class TicketController extends Controller
 
             //Si existió algún problema con el stock de alguno de los productos, enviamos una respuesta en formato JSON
             if (count($stocksValidation) > 0) {
+
+                json_encode($stocksValidation);
+
+                return Response::make($stocksValidation, 404);
+
+                /* return response()->json([
+                    "status" => false,
+                    "errors" => $stocksValidation
+                ], 404); */
                 return Response::make($stocksValidation, 404);
                 // return response()->json([
                 //     "status" => false,
