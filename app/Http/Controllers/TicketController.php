@@ -184,7 +184,7 @@ class TicketController extends Controller
                                 "box_id" => $box->id,
                                 "barcode" => $box->barcode,
                                 "message" => "El stock de tapas es de 0",
-                                "faltante" => $detail['total_tapas'] - $product->stock_tapas
+                                "faltante" => $detail['total_tapas'] - $box->stock_tapas
                             )
                         );
                     }
@@ -235,11 +235,24 @@ class TicketController extends Controller
                 //Utilizamos el arreglo con el total de kilos por producto, para sumarlos al stock actual    
                 foreach ($sk as $key => $value) {
                     //Generamos una colección, usando el barcode del producto
-                    $product = Product::where('barcode', $value['barcode'])->first();
+                    //$product = Product::where('barcode', $value['barcode'])->first();
                     //Sumamos los kilos recibidos en el ticket, al stock actual de la colección generada
-                    $product->stock_kilos = $product->stock_kilos + $value['kilos'];
+                    //$product->stock_kilos = $product->stock_kilos + $value['kilos'];
                     //Finalmente, actualizamos la colección, para reflejar los cambios en el registro de la base de datos
-                    $product->save();
+                    //$product->save();
+
+                    $product = Product::find($value['product_id']);
+
+                    //dd($product);
+                    
+                    if($product) {
+                        //dd('ola',$product->stock_kilos + $value['kilos']);
+                        $product->stock_kilos = $product->stock_kilos + $value['kilos'];
+                        $product->save();
+                        //dd($product);
+                        //dd($product);
+                    }
+                
                 }
 
                 //Mediante un foreach, recorreremos los datos recibidos desde la petición para registrar los detalles del ticket
