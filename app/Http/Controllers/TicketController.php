@@ -94,6 +94,8 @@ class TicketController extends Controller
             array_push($sk, $stockKilo);
         }
 
+        //dd($sk);
+
 
         //Verificamos si el tipo de ticket, es una salida de inventario
         if ($request->tipo === 2) {
@@ -108,33 +110,37 @@ class TicketController extends Controller
                 //Obtenemos el producto, a partir del código de barras, para obtener el total de kilos a comparar
                 $product = Product::where('barcode', $value['barcode'])->first();
                 //Primero validamos si hay stock en el inventario
-                if ($product->stock_kilos === 0.0) {
-                    array_push(
-                        $stocksValidation,
-                        array(
-                            "product_id" => $product->id,
-                            "barcode" => $product->barcode,
-                            "product" => $product->nombre,
-                            "message" => "El stock de este producto es 0",
-                            "faltante" => $value['kilos'] - $product->stock_kilos . ' kilos'
-                        )
-                    );
+                
+                if($product) {
+                    if ($product->stock_kilos === 0.0) {
+                        array_push(
+                            $stocksValidation,
+                            array(
+                                "product_id" => $product->id,
+                                "barcode" => $product->barcode,
+                                "product" => $product->nombre,
+                                "message" => "El stock de este producto es 0",
+                                "faltante" => $value['kilos'] - $product->stock_kilos . ' kilos'
+                            )
+                        );
+                    }
+                    //Si el stock es mayor que 0, validamos que se cuente con stock suficiente del producto
+                    else if ($product->stock_kilos < $value['kilos']) {
+                        //dd($product->stock_kilos);
+                        //dd($product->stock, $value['kilos']);
+                        array_push(
+                            $stocksValidation,
+                            array(
+                                "product_id" => $product->id,
+                                "barcode" => $product->barcode,
+                                "product" => $product->nombre,
+                                "message" => "No hay stock suficiente",
+                                "faltante" => $value['kilos'] - $product->stock_kilos . ' de ' . $value['kilos'] . ' kilos'
+                            )
+                        );
+                    }
                 }
-                //Si el stock es mayor que 0, validamos que se cuente con stock suficiente del producto
-                else if ($product->stock_kilos < $value['kilos']) {
-                    //dd($product->stock_kilos);
-                    //dd($product->stock, $value['kilos']);
-                    array_push(
-                        $stocksValidation,
-                        array(
-                            "product_id" => $product->id,
-                            "barcode" => $product->barcode,
-                            "product" => $product->nombre,
-                            "message" => "No hay stock suficiente",
-                            "faltante" => $value['kilos'] - $product->stock_kilos . ' de ' . $value['kilos'] . ' kilos'
-                        )
-                    );
-                }
+
             }
 
             //Lo siguiente consiste en validar si se cuenta con cajas suficientes para el ticket a generar
@@ -260,11 +266,18 @@ class TicketController extends Controller
                 }
 
             } else if ($request->tipo === 2) {
+                //dd($sk);
                 foreach ($sk as $key => $value) {
-                    $product = Product::where('barcode', $value['barcode'])->first();
-                    //dd('acá no hay error');
-                    $product->stock_kilos = $product->stock_kilos - $value['kilos'];
-                    $product->save();
+                    $product = Product::find($value['product_id']);
+
+                    //dd($product);
+                    
+                    if($product) {
+                        //dd('ola',$product->stock_kilos - $value['kilos']);
+                        $product->stock_kilos = $product->stock_kilos - $value['kilos'];
+                        $product->save();
+                        //dd($product);
+                    }
                 }
 
                 foreach ($request->details as $detail) {
