@@ -8,6 +8,7 @@ use App\Models\Ticket;
 use App\Models\TicketDetail;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Response;
 use Validator;
 
 class TicketController extends Controller
@@ -108,9 +109,11 @@ class TicketController extends Controller
             foreach ($sk as $key => $value) {
 
                 //Obtenemos el producto, a partir del código de barras, para obtener el total de kilos a comparar
-                $product = Product::where('barcode', $value['barcode'])->first();
+                //$product = Product::where('barcode', $value['barcode'])->first();
+                $product = Product::find($value['product_id']);
                 //Primero validamos si hay stock en el inventario
-                
+                //dd($product);
+
                 if($product) {
                     if ($product->stock_kilos === 0.0) {
                         array_push(
@@ -207,10 +210,20 @@ class TicketController extends Controller
 
             //Si existió algún problema con el stock de alguno de los productos, enviamos una respuesta en formato JSON
             if (count($stocksValidation) > 0) {
-                return response()->json([
+
+                json_encode($stocksValidation);
+
+                return Response::make($stocksValidation, 404);
+
+                /* return response()->json([
                     "status" => false,
                     "errors" => $stocksValidation
-                ], 404);
+                ], 404); */
+                return Response::make($stocksValidation, 404);
+                // return response()->json([
+                //     "status" => false,
+                //     "errors" => json_encode($stocksValidation)
+                // ], 404);
             }
 
         }
@@ -232,7 +245,7 @@ class TicketController extends Controller
 
             //Si es una entrada de almacen, realizaremos el siguiente procedimiento
             if ($request->tipo === 1) {
-                //Utilizamos el arreglo con el total de kilos por producto, para sumarlos al stock actual    
+                //Utilizamos el arreglo con el total de kilos por producto, para sumarlos al stock actual
                 foreach ($sk as $key => $value) {
                     //Generamos una colección, usando el barcode del producto
                     //$product = Product::where('barcode', $value['barcode'])->first();
@@ -244,7 +257,7 @@ class TicketController extends Controller
                     $product = Product::find($value['product_id']);
 
                     //dd($product);
-                    
+
                     if($product) {
                         //dd('ola',$product->stock_kilos + $value['kilos']);
                         $product->stock_kilos = $product->stock_kilos + $value['kilos'];
@@ -252,7 +265,7 @@ class TicketController extends Controller
                         //dd($product);
                         //dd($product);
                     }
-                
+
                 }
 
                 //Mediante un foreach, recorreremos los datos recibidos desde la petición para registrar los detalles del ticket
@@ -284,7 +297,7 @@ class TicketController extends Controller
                     $product = Product::find($value['product_id']);
 
                     //dd($product);
-                    
+
                     if($product) {
                         //dd('ola',$product->stock_kilos - $value['kilos']);
                         $product->stock_kilos = $product->stock_kilos - $value['kilos'];
@@ -325,7 +338,7 @@ class TicketController extends Controller
                 'details' => json_decode($getTicketDetails)
             ], 201);
 
-            //Si algo falló al dar de alta el ticket, enviar una respuesta en formato JSON   
+            //Si algo falló al dar de alta el ticket, enviar una respuesta en formato JSON
         } else {
             return response()->json([
                 "status" => false,
@@ -515,7 +528,7 @@ class TicketController extends Controller
 
         //Si es una entrada de almacen, realizaremos el siguiente procedimiento
         if ($ticket->tipo === 1) {
-            //Utilizamos el arreglo con el total de kilos por producto, para sumarlos al stock actual    
+            //Utilizamos el arreglo con el total de kilos por producto, para sumarlos al stock actual
             foreach ($stockKilos as $sk) {
                 //Generamos una colección, usando el barcode del producto
                 $product = Product::where('barcode', $sk['barcode'])->first();
@@ -541,7 +554,7 @@ class TicketController extends Controller
                 //dd($detail);
                 //Eliminamos el registro de la tabla detalle tickets
                 TicketDetail::find($detail['id'])->delete();
-                
+
             }
 
             //Una vez devueltos los valores del stock, eliminamos el ticket en cuestión
@@ -561,7 +574,7 @@ class TicketController extends Controller
                 ], 404);
             }
 
-            
+
         } else if ($ticket->tipo === 2) {
             //dd("hola");
             foreach ($stockKilos as $sk) {
