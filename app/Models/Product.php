@@ -11,11 +11,14 @@ class Product extends Model
 
     protected $attributes = [
         'stock_kilos' => 0,
+        'stock_cajas' => 0,
+        'stock_tapas' => 0
     ];
 
     protected $fillable = [
         'barcode',
         'nombre',
+        'codigo_proveedor',
         'costo_kilo',
         'proveedor_id'
     ];

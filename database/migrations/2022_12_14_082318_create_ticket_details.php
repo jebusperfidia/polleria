@@ -21,12 +21,10 @@ return new class extends Migration {
             $table->integer('total_cajas');
             $table->integer('total_tapas');
             $table->unsignedBigInteger('ticket_id');
-            $table->unsignedBigInteger('box_id')->nullable();
             $table->unsignedBigInteger('product_id')->nullable();
             $table->timestamps();
 
             $table->foreign('ticket_id')->references('id')->on('tickets');
-            $table->foreign('box_id')->references('id')->on('boxes');
             $table->foreign('product_id')->references('id')->on('products');
         });
     }

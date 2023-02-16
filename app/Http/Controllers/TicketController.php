@@ -67,6 +67,8 @@ class TicketController extends Controller
         //Si hay algún error de validación, enviar en formato JSON
         if ($validate->fails()) {
             return response()->json([
+                "status" => false,
+                "message" => "Alta de producto exitosa",
                 "errors" => $validate->errors()
             ]);
         }

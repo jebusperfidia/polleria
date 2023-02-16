@@ -16,8 +16,6 @@ return new class extends Migration
         Schema::create('providers', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('nombre', 150);
-            $table->string('rfc', 30)->unique();
-            $table->timestamps();
         });
     }
 
