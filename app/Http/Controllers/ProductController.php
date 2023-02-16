@@ -286,8 +286,7 @@ class ProductController extends Controller
         $product = Product::where('barcode', $barcode)->first();
 
         if (!$product) {
-            //Si se obtuvo la información del producto, enviamos una respuesta, en formato JSON
-            //dd(strlen($barcode));
+            
             switch (strlen($barcode)) {
 
 
@@ -323,7 +322,8 @@ class ProductController extends Controller
                             return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "product" => $product,
+                            "type" => "product",
+                            "data" => $product,
                             "kilos_caja" => $kilosNP
                         ], 201);
                         
@@ -333,7 +333,8 @@ class ProductController extends Controller
                           return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "product" => $product,
+                            "type" => "product",
+                            "data" => $product,
                             "kilos_caja" => $kilosSC
                         ], 201);
                     }
@@ -364,7 +365,8 @@ class ProductController extends Controller
                         return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "product" => $product,
+                            "type" => "product",
+                            "data" => $product,
                             "kilos_caja" => $kilos
                         ], 201);
                     }
@@ -380,6 +382,7 @@ class ProductController extends Controller
 
                         return response()->json([
                             "status" => true,
+                            "type" => "product",
                             "kilos" => $kilos
                         ], 201);
                     
@@ -411,7 +414,8 @@ class ProductController extends Controller
                         return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "product" => $product,
+                            "type" => "product",
+                            "data" => $product,
                             "kilos_caja" => $kilos
                         ], 201);
                     }
@@ -424,7 +428,7 @@ class ProductController extends Controller
                     
                         return response()->json([
                             "status" => false,
-                            "message" => "Producto no encontrado",
+                            "message" => "El código no coincide con ningún producto",
                         ], 201);
                      
                 //echo 'No se encontró código de barras';
@@ -437,7 +441,8 @@ class ProductController extends Controller
             return response()->json([
                 "status" => true,
                 "message" => "Datos encontrados con exito",
-                "product" => $product
+                'type' => "barcode",
+                "data" => $product
             ], 201);
         }
 

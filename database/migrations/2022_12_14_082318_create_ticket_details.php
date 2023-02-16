@@ -14,7 +14,6 @@ return new class extends Migration {
     {
         Schema::create('ticket_details', function (Blueprint $table) {
             $table->id();
-            $table->string('barcode', 150);
             $table->double('kilos');
             $table->double('costo_kilo');
             $table->double('subtotal');
