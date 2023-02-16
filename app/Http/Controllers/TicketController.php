@@ -40,7 +40,8 @@ class TicketController extends Controller
         $rules = [
             'tipo' => 'required|numeric',
             'total' => 'required|numeric',
-            'details.*.barcode' => [
+            'details.*.barcode' => 'required|exists:products,barcode',
+          /*   'details.*.barcode' => [
                 'required',
                 //validamos que exista el barcode, verificando que se cuente con al menos un registro en la tabla de productos o cajas
                 function ($attribute, $value, $fail) {
@@ -50,9 +51,8 @@ class TicketController extends Controller
                         return $fail($attribute . ' not exist.');
                     }
                 }
-            ],
+            ], */
             'details.*.product_id' => 'required|numeric|exists:products,id',
-            'details.*.box_id' => 'numeric|exists:boxes,id',
             'details.*.kilos' => 'required|numeric',
             'details.*.costo_kilo' => 'required|numeric',
             'details.*.subtotal' => 'required|numeric',
@@ -67,13 +67,12 @@ class TicketController extends Controller
         //Si hay algún error de validación, enviar en formato JSON
         if ($validate->fails()) {
             return response()->json([
-                "status" => false,
-                "message" => "Alta de producto exitosa",
                 "errors" => $validate->errors()
             ]);
         }
 
 
+        dd('vamos');
 
 
         //Generamos una variable para obtener el total de kilos por producto, mismo que usaremos para la validación de stock, las entradas y salidas

@@ -36,12 +36,7 @@ class ProductController extends Controller
             'codigo_proveedor' => [
                 'required',
                 function ($attribute, $value, $fail) {
-                    //dd($attribute, $value);
-                    $cP = (int) $value;
-                    //dd($cP);
-                    //$GLOBALS['idPr'];
-                    //dd($GLOBALS['idPr']);
-                    $product = Product::where('codigo_proveedor', $cP)->where('proveedor_id', $GLOBALS['idPr'])->first();
+                    $product = Product::where('codigo_proveedor', $value)->where('proveedor_id', $GLOBALS['idPr'])->first();
                     //dd($product);
                     if ($product) {
                         return $fail('El código del proveedor ya está en uso');
@@ -61,31 +56,6 @@ class ProductController extends Controller
             ]);
         }
 
-
-        //Validaciones
-     /*    $validate = Validator::make($request->all(), [
-            'barcode' => 'string|unique:products', */
-            /*  [
-            'required',
-            'string',
-            //Validamos que el barcode no esté tomado por algún otro producto o caja, ya que debe ser un campo único
-            Rule::unique('products'),
-            Rule::unique('boxes')
-            ], */
-          /*   'codigo_proveedor' => 'required',
-            'nombre' => 'required|string|max:100',
-            'costo_kilo' => 'required|numeric',
-            //Validamos que exista el id del proveedor para el registro del producto
-            'proveedor_id' => 'required|numeric|exists:providers,id'
-        ]);
- */
-        //Si hay algún error de validación, enviamos una respuesta, en formato JSON
-      /*   if ($validate->fails()) {
-            return response()->json([
-                "errors" => $validate->errors()
-            ]);
-        }
- */
         // Si las validaciones son correctas, damos de alta el producto
         $product = Product::create($request->all());
         /* $provider = Provider::create([
@@ -144,19 +114,38 @@ class ProductController extends Controller
             ]);
         }
 
+        
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
 
-        //Si el producto existe, validamos la información recibida en el body
+        global $idPr, $idP;
+        $idPr = $request->proveedor_id;
+        $idP = (int )$id;
+        //dd($idP);
+
+
+        //Validamos la información recibida en el body
         $validate = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:100',
+            'proveedor_id' => 'required|numeric|exists:providers,id',
             'barcode' => [
                 'required',
                 'string',
                 //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
                 Rule::unique('products')->ignore($product->id),
             ],
-            'nombre' => 'required|string|max:100'
+            'codigo_proveedor' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    $productV = Product::where('codigo_proveedor', $value)->where('proveedor_id', $GLOBALS['idPr'])->first();
+                    if ($productV) {
+                        if($productV->id !== $GLOBALS['idP']) {
+                            return $fail('El código del proveedor ya está en uso');
+                        }
+                    }
+                }
 
+            ],
         ]);
 
         //Si hay algún error de validación enviamos una respuesta, en formato JSON
