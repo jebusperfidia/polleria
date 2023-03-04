@@ -22,11 +22,11 @@ class ProductController extends Controller
     public function store(Request $request)
     {       
 
+        //dd('Hola cabeza de bola');
         //Generamos una variable global para poder hacer la validación personalizada
         global $idPr;
         //Almacenamos el valor del id del producto, en la variable global
         $idPr = $request->proveedor_id;
-
 
         //Generamos las reglas para validar todos los valores enviados en el body
         $rules = [
@@ -336,7 +336,7 @@ class ProductController extends Controller
                             return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "type" => "product",
+                            "type" => "box",
                             "data" => $product,
                             "kilos_caja" => $kilosNP
                         ], 201);
@@ -347,7 +347,7 @@ class ProductController extends Controller
                           return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "type" => "product",
+                            "type" => "box",
                             "data" => $product,
                             "kilos_caja" => $kilosSC
                         ], 201);
@@ -383,7 +383,7 @@ class ProductController extends Controller
                         return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "type" => "product",
+                            "type" => "box",
                             "data" => $product,
                             "kilos_caja" => $kilos
                         ], 201);
@@ -403,8 +403,8 @@ class ProductController extends Controller
                     //Enviamos el total de kilos, así como el proveedor al que pertenece
                     return response()->json([
                         "status" => true,
-                        "provider" => "Grupo Pecuario"
-                        "type" => "product",
+                        "provider" => "Grupo Pecuario",
+                        "type" => "box",
                         "kilos" => $kilos
                     ], 201);
                     
@@ -437,7 +437,7 @@ class ProductController extends Controller
                         return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
-                            "type" => "product",
+                            "type" => "box",
                             "data" => $product,
                             "kilos_caja" => $kilos
                         ], 201);
@@ -463,7 +463,7 @@ class ProductController extends Controller
             return response()->json([
                 "status" => true,
                 "message" => "Datos encontrados con exito",
-                'type' => "barcode",
+                'type' => "product",
                 "data" => $product
             ], 201);
         }
