@@ -14,19 +14,23 @@ use Validator;
 class TicketController extends Controller
 {
 
-
-    public function index()
-    {
+        public function index()
+        {
         return response()->json([
             "status" => true,
             "message" => 'Datos obtenidos con éxito',
             "ticket" => Ticket::all()
         ], 201);
-    }
+        }
 
 
-    public function store(Request $request)
-    {
+
+
+
+
+
+        public function store(Request $request)
+        {
 
         //Validamos que se enviaron datos
         if (!$request->all()) {
@@ -158,15 +162,17 @@ class TicketController extends Controller
 
             }
 
-       
             //Si existió algún problema con el stock de alguno de los productos, enviamos una respuesta en formato JSON
             if (count($stocksValidation) > 0) {
-
+    
                 json_encode($stocksValidation);
-
+    
                 return Response::make($stocksValidation, 404);
-
+    
+            }
         }
+
+       
 
         //Finalizamos la validación de datos
 
