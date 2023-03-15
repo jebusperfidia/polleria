@@ -340,7 +340,7 @@ class ProductController extends Controller
                             "data" => $product,
                             "kilos_caja" => $kilosNP
                         ], 201);
-                        
+
                     } else {
 
                         //Si se encontró un producto de St Clara, enviamos una respuesta en formato JSON
@@ -411,7 +411,6 @@ class ProductController extends Controller
 
                     break;
 
-
                 case 25: //Bachoco
 
                     //Obtenemos los kilos del barcode
@@ -443,10 +442,42 @@ class ProductController extends Controller
                         ], 201);
                     }
 
-                    //echo 'Soy bachoco';
+                    break;
+
+                    case 23: //Supollo
+                        
+                    
+                    //Obtenemos los kilos del barcode
+                    $k = substr($barcode, 3, -18) . '.' . substr($barcode, 5, -14);
+                    //Convertimos el valor a float
+                    $kilos = floatval($k);
+                    //Obtenemos el código del proveedor, del barcode
+                    $cP = substr($barcode, 2, -20);
+                    //dd($cP);
+
+                    //Primero verificamos si el código del proveedor, pertenece a un producto de Bachoco
+                    $product = Product::where('codigo_proveedor', $cP)->first();
+
+                    //Si no se encontró ninguna coincidencia, enviamos una respuesta
+                    if (!$product) {
+                        return response()->json([
+                            "status" => false,
+                            "message" => "Producto no encontrado",
+                        ], 201);
+                    } 
+                    
+                    //Si se encontró un producto de Bachoco, enviamos una respuesta en formato JSON
+                    else {
+                        return response()->json([
+                            "status" => true,
+                            "message" => "Datos encontrados con exito",
+                            "type" => "box",
+                            "data" => $product,
+                            "kilos_caja" => $kilos
+                        ], 201);
+                    }
 
                     break;
-                
                     //Si no se encontró ninguna coincidencia en el largo del barcode, enviamos una respuesta, en formato JSON
                     default:
                     

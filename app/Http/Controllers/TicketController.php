@@ -210,7 +210,6 @@ class TicketController extends Controller
                     $detail['updated_at'] = now();
                     //Insertamos el valor en la base de datos, en la tabla de ticketDetails
                     TicketDetail::insert($detail);
-
                 }
 
 
