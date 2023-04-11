@@ -20,7 +20,7 @@ class ProductController extends Controller
 
 
     public function store(Request $request)
-    {       
+    {
 
         //dd('Hola cabeza de bola');
         //Generamos una variable global para poder hacer la validación personalizada
@@ -96,6 +96,32 @@ class ProductController extends Controller
         ], 201);
     }
 
+    public function productsByProvider($proveedor_id)
+    {
+        //Validamos el formato del id del proveedor
+        $validateid = Validator::make(['proveedor_id' => $proveedor_id], [
+            'proveedor_id' => 'required|numeric|integer|exists:products,proveedor_id'
+        ]);
+
+
+        //Si hubo algún error de validación enviamos un respuesta, en formato JSON
+        if ($validateid->fails()) {
+            return response()->json([
+                "errors" => $validateid->errors()
+            ]);
+        }
+
+        //Buscamos el producto mediante el id y generamos una colección
+        $product = Product::where('proveedor_id', $proveedor_id)->get();
+
+        //Si se obtuvo la información del producto, enviamos una respuesta, en formato JSON
+        return response()->json([
+            "status" => true,
+            "message" => "Datos encontrados con exito",
+            "product" => $product
+        ], 201);
+    }
+
 
 
     public function update(Request $request, $id)
@@ -113,7 +139,7 @@ class ProductController extends Controller
             ]);
         }
 
-        
+
         //Buscamos el producto mediante el id y generamos una colección
         $product = Product::find($id);
 
@@ -242,7 +268,7 @@ class ProductController extends Controller
     {
 
         //Buscamos el producto mediante el id y generamos una colección
-        $product = Product::find($id);
+        $product = Product::where('id', $id)->first();
 
         //Si el producto existe, validamos el barcode
         $validate = Validator::make(['barcode' => $barcode], [
@@ -251,7 +277,6 @@ class ProductController extends Controller
                 'string',
                 //Validamos que el barcode no este tomado por otro producto, ignorando el producto seleccionado
                 Rule::unique('products')->ignore($product->id),
-                Rule::unique('boxes')->ignore($product->barcode)
             ]
         ]);
 
@@ -293,7 +318,7 @@ class ProductController extends Controller
         //Si no se encontró el producto mediante el barcode, ingresamos al if
         //Desde el cual validaremos el formato del barcode
         if (!$product) {
-            
+
             //Mediante un Switch Case, dependiendo el largo del barcode
             //Ingresaremos a cada case, referente a uno o más proveedores
             switch (strlen($barcode)) {
@@ -308,30 +333,30 @@ class ProductController extends Controller
                     $kilosNP = floatval($kNP);
                     //Obtenemos el código del proveedor, del barcode
                     $cPNP = substr($barcode, 0, -17);
-                    
-                    
+
+
                     //Obtenemos los kilos del barcode
                     $kSC = substr($barcode, 3, -15) . '.' . substr($barcode, 5, -13);
                     //Convertimos el valor a float
                     $kilosSC = floatval($kSC);
                     //Obtenemos el código del proveedor, del barcode
                     $cPSC = substr($barcode, 1, -17);
-                    
+
 
                     //Primero verificamos si el código del proveedor, pertenece a un producto de St Clara
                     $product = Product::where('codigo_proveedor', $cPSC)->first();
-                    
+
                     //Si no se obtuvo ningún resultado, ahora verificamos el código del proveedor de Nutry Pollo
                     if(!$product) {
                         $product = Product::where('codigo_proveedor', $cPNP)->first();
-                         
+
                         //Si no se encontró ninguna coincidencia de ambos proveedores, enviamos una respuesta
                         if(!$product){
                             return response()->json([
                             "status" => false,
                             "message" => "Producto no encontrado",
                             ], 201);
-                        } 
+                        }
                             //Si se encontró un producto de Nutry pollo, enviamos una respuesta en formato JSON
                             return response()->json([
                             "status" => true,
@@ -376,8 +401,8 @@ class ProductController extends Controller
                             "status" => false,
                             "message" => "Producto no encontrado",
                         ], 201);
-                    } 
-                    
+                    }
+
                     //Si se encontró un producto de Sabro Pollo, enviamos una respuesta en formato JSON
                     else {
                         return response()->json([
@@ -399,15 +424,16 @@ class ProductController extends Controller
                     $k = substr($barcode, 10, -3) . '.' . substr($barcode, 12, -1);
                     //Convertimos el valor a float
                     $kilos = floatval($k);
-                        
+
                     //Enviamos el total de kilos, así como el proveedor al que pertenece
                     return response()->json([
                         "status" => true,
                         "provider" => "Grupo Pecuario",
+                        "id_provider" => 4,
                         "type" => "box",
-                        "kilos" => $kilos
+                        "kilos_caja" => $kilos
                     ], 201);
-                    
+
 
                     break;
 
@@ -429,8 +455,8 @@ class ProductController extends Controller
                             "status" => false,
                             "message" => "Producto no encontrado",
                         ], 201);
-                    } 
-                    
+                    }
+
                     //Si se encontró un producto de Bachoco, enviamos una respuesta en formato JSON
                     else {
                         return response()->json([
@@ -445,8 +471,8 @@ class ProductController extends Controller
                     break;
 
                     case 23: //Supollo
-                        
-                    
+
+
                     //Obtenemos los kilos del barcode
                     $k = substr($barcode, 3, -18) . '.' . substr($barcode, 5, -14);
                     //Convertimos el valor a float
@@ -464,8 +490,8 @@ class ProductController extends Controller
                             "status" => false,
                             "message" => "Producto no encontrado",
                         ], 201);
-                    } 
-                    
+                    }
+
                     //Si se encontró un producto de Bachoco, enviamos una respuesta en formato JSON
                     else {
                         return response()->json([
@@ -480,7 +506,7 @@ class ProductController extends Controller
                     break;
                     //Si no se encontró ninguna coincidencia en el largo del barcode, enviamos una respuesta, en formato JSON
                     default:
-                    
+
                         return response()->json([
                             "status" => false,
                             "message" => "El código no coincide con ningún producto",
