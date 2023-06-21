@@ -20,6 +20,7 @@ class Product extends Model
         'nombre',
         'codigo_proveedor',
         'costo_kilo',
+        'stock_kilos',
         'proveedor_id'
     ];
 }

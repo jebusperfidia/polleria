@@ -153,6 +153,7 @@ class ProductController extends Controller
         $validate = Validator::make($request->all(), [
             'nombre' => 'required|string|max:100',
             'proveedor_id' => 'required|numeric|exists:providers,id',
+            'stock_kilos' => 'required|numeric',
             'barcode' => [
                 'required',
                 'string',
@@ -187,6 +188,9 @@ class ProductController extends Controller
 
         //Si el producto es válido, intentamos generar el update
         //Si algo falla en el proceso, enviamos una respuesta, en formato JSON
+        //dd($request);
+        //$product->update($request->all());
+        //dd($product);
         if (!$product->update($request->all())) {
             return response()->json([
                 "status" => false,
