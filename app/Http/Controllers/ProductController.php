@@ -422,10 +422,10 @@ class ProductController extends Controller
 
 
 
-                case 15: //Grupo pecuario
+                case 14: //Grupo pecuario
 
                     //Obtenemos los kilos del barcode
-                    $k = substr($barcode, 10, -3) . '.' . substr($barcode, 12, -1);
+                    $k = substr($barcode, 10, -2) . '.' . substr($barcode, 12, 13);
                     //Convertimos el valor a float
                     $kilos = floatval($k);
 

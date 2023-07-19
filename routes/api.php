@@ -21,11 +21,11 @@ use App\Http\Controllers\ProviderController;
 //Ruta para realizar el login de usuarios
 Route::post('login', [AuthController::class, 'login']);
 Route::post('user-register', [AuthController::class, 'store']);
+Route::get('users', [AuthController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
     //Rutas para el controlador de usuarios
-    Route::get('users', [AuthController::class, 'index']);
     Route::get('user-show/{id}', [AuthController::class, 'show']);
     Route::put('user-update/{id}', [AuthController::class, 'update']);
     Route::put('user-update-password/{id}', [AuthController::class, 'updatePassword']);
