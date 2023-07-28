@@ -154,6 +154,8 @@ class ProductController extends Controller
             'nombre' => 'required|string|max:100',
             'proveedor_id' => 'required|numeric|exists:providers,id',
             'stock_kilos' => 'required|numeric',
+            'stock_cajas' => 'required|numeric',
+            'stock_tapas' => 'required|numeric',
             'barcode' => [
                 'required',
                 'string',

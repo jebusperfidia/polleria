@@ -21,6 +21,8 @@ class Product extends Model
         'codigo_proveedor',
         'costo_kilo',
         'stock_kilos',
+        'stock_cajas',
+        'stock_tapas',
         'proveedor_id'
     ];
 }
