@@ -20,9 +20,11 @@ use App\Http\Controllers\ProviderController;
 
 //Ruta para realizar el login de usuarios
 Route::post('login', [AuthController::class, 'login']);
+Route::post('ticket-print', [TicketController::class, 'ticketPrint']);
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    
+
     //Rutas para el controlador de usuarios
     Route::get('users', [AuthController::class, 'index']);
     Route::post('user-register', [AuthController::class, 'store']);
@@ -65,6 +67,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('ticket-show/{id}', [TicketController::class, 'show']);
     Route::delete('ticket-delete/{id}', [TicketController::class, 'destroy']);
     Route::get('product-detect/{bardcode}', [TicketController::class, 'detect']);
+
 
     //Rutas para el controlador cajas o boxes
     Route::get('boxes', [BoxController::class, 'index']);
