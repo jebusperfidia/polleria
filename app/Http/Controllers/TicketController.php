@@ -11,6 +11,10 @@ use Illuminate\Validation\Rule;
 use Response;
 use Validator;
 
+// require __DIR__ . '/../../autoload.php';
+use Mike42\Escpos\PrintConnectors\NetworkPrintConnector;
+use Mike42\Escpos\Printer;
+
 class TicketController extends Controller
 {
 
@@ -116,7 +120,7 @@ class TicketController extends Controller
                                 "faltante" => $detail['total_cajas'] - $product->stock_cajas
                             )
                         );
-                    
+
                     }
                     //Si el stock es mayor que 0, validamos que se cuente con stock suficiente para la petición
                     else if ($product->stock_cajas < $detail['total_cajas']) {
@@ -158,21 +162,21 @@ class TicketController extends Controller
                         );
                     }
                 }
-                
+
 
             }
 
             //Si existió algún problema con el stock de alguno de los productos, enviamos una respuesta en formato JSON
             if (count($stocksValidation) > 0) {
-    
+
                 json_encode($stocksValidation);
-    
+
                 return Response::make($stocksValidation, 404);
-    
+
             }
         }
 
-       
+
 
         //Finalizamos la validación de datos
 
@@ -386,7 +390,7 @@ class TicketController extends Controller
                             )
                         );
                     }
-    
+
                 //Ahora validamos que se cuente con el stock suficiente de tapas
                     if ($product->stock_tapas < $detail['total_tapas']) {
                         array_push(
@@ -416,7 +420,7 @@ class TicketController extends Controller
         if ($ticket->tipo === 1) {
             //Recorremos los detalles del ticket, que obtuvimos anteriormente
             foreach ($ticketDetails as $detail) {
-                
+
                 //Buscamos el producto de cada detalle y eliminamos del inventario los kilos, cajas y tapas
                 //Que se cargaron al inventario al generar la alta
                 $product = Product::find($detail['product_id']);
@@ -445,9 +449,9 @@ class TicketController extends Controller
                     "message" => "No fue posible eliminar el ticket"
                 ], 404);
             }
-  
-        } 
-        
+
+        }
+
         //Si el ticket fue de salida, recorremos todos los elementos obtenidos de los detalles
         //Y sumamos al invenatario de cada producto, los kilos, cajas y tapas que se eliminaron
         else if ($ticket->tipo === 2) {
@@ -481,6 +485,206 @@ class TicketController extends Controller
             }
         }
 
+    }
+
+    public function ticketPrint(Request $request)
+    {
+
+        $connector = new NetworkPrintConnector("192.168.100.55", 9100);
+        // dd($connector);
+
+        /* Information for the receipt */
+        $titles = new item1('PRODUCTO', 'KILOS', 'COSTO', 'IMPORTE');
+
+        $items = [];
+
+        foreach ($request->details as $value) {
+            array_push(
+                $items,
+                new item2(wordwrap($value['nombreProducto'], 15, "\n", false), $value['kilos'], $value['costo_kilo'], $value['subtotal'])
+            );
+        }
+
+        $tipo = $request->ticket['tipo'] == 1 ? 'Entrada' : 'Salida';
+
+        $total = new item3('Total', $request->ticket['total'], true);
+        /* Date is kept the same for testing */
+        // $date = date('l jS \of F Y h:i:s A');
+        date_default_timezone_set('America/Mexico_City');
+        $date = date("d-m-Y h:i:s");
+        // $date = "Monday 6th of April 2015 02:56:25 PM";
+        /* Print a "Hello world" receipt" */
+        $printer = new Printer($connector);
+
+
+        /* Start the printer */
+
+        /* Name of shop */
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
+        $printer->text("POLLERIA GARCIA.\n");
+        $printer->selectPrintMode();
+        $printer->text("PONTIGFICA, LEÓN GTO.\n");
+        $printer->feed();
+
+
+        /* Title of receipt */
+        $printer->setEmphasis(true);
+        $printer->text("$tipo\n");
+        $printer->feed();
+        $printer->setEmphasis(false);
+
+        /* Title of receipt */
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+        $printer->setEmphasis(false);
+        $printer->text($titles->getAsTitles(32));
+        $printer->feed();
+
+        /* Items */
+        foreach ($request->details as $value) {
+            $producto = $value['nombreProducto'];
+            $printer -> text("$producto\n");
+            $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s', '', $value['kilos'], 'x', $value['costo_kilo'], '=', $value['subtotal']);
+            $printer -> text("$line\n");
+        }
+
+        $printer->feed();
+
+        /* Tax and total */
+        $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
+        $printer->text($total->getAsString(32));
+        $printer->selectPrintMode();
+
+        /* Footer */
+        $printer->feed(2);
+        $printer->setJustification(Printer::JUSTIFY_CENTER);
+        $printer->feed(2);
+        $printer->text($date . "\n");
+
+
+        $printer -> cut();
+
+        /* Close printer */
+        $printer -> close();
+
+        return response()->json([
+            "status" => true,
+            "message" => "TicketPrint",
+        ], 201);
+
+    }
+
+}
+
+/* A wrapper to do organise item names & prices into columns */
+class item1
+{
+    private $PRODUCTO;
+    private $KILOS;
+    private $COSTO;
+    private $IMPORTE;
+
+
+    public function __construct($PRODUCTO = '', $KILOS = '', $COSTO = '', $IMPORTE = '',)
+    {
+        $this->PRODUCTO = $PRODUCTO;
+        $this->KILOS = $KILOS;
+        $this->COSTO = $COSTO;
+        $this->IMPORTE = $IMPORTE;
+
+    }
+
+    public function getAsTitles($width = 48)
+    {
+        $leftCols = 12;
+        $left = str_pad($this->PRODUCTO, $leftCols);
+        $right = str_pad($this->KILOS, 12, ' ', STR_PAD_LEFT);
+        $right2 = str_pad($this->COSTO, 10, ' ', STR_PAD_LEFT);
+        $right3 = str_pad($this->IMPORTE, 12, ' ', STR_PAD_LEFT);
+
+        return "$left$right$right2$right3\n";
+    }
+
+    public function __toString()
+    {
+        return $this->getAsTitles();
+    }
+
+}
+
+class item2
+{
+    private $PRODUCTO;
+    private $KILOS;
+    private $COSTO;
+    private $IMPORTE;
+
+    public function __construct($PRODUCTO = '', $KILOS = '', $COSTO = '', $IMPORTE = '')
+    {
+        $this->PRODUCTO = $PRODUCTO;
+        $this->KILOS = $KILOS;
+        $this->COSTO = $COSTO;
+        $this->IMPORTE = $IMPORTE;
+    }
+
+    public function getAsStringProducto($width = 48)
+    {
+
+
+        $leftCols = 12;
+        $left = str_pad($this->PRODUCTO, $leftCols);
+
+
+        $sign = ('$ ');
+        $sign2 = ('Kg ');
+        $right = str_pad($this->KILOS  . $sign2, 12, ' ', STR_PAD_LEFT);
+        $right1 = str_pad($sign . $this->COSTO, 10, ' ', STR_PAD_LEFT);
+        $right2 = str_pad($sign . $this->IMPORTE, 10, ' ', STR_PAD_LEFT);
+
+
+        return "$left$right$right1$right2\n";
+    }
+
+    public function __toString()
+    {
+        return $this->getAsStringProducto();
+    }
+
+}
+
+class item3
+{
+    private $name;
+    private $price;
+    private $dollarSign;
+
+    public function __construct($name = '', $price = '', $dollarSign = false)
+    {
+        $this->name = $name;
+        $this->price = $price;
+        $this->dollarSign = $dollarSign;
+    }
+
+    public function getAsString($width = 48)
+    {
+        $rightCols = 10;
+        $leftCols = 8;
+        if ($this->dollarSign) {
+            $leftCols = $leftCols / 2 - $rightCols / 2;
+        }
+        $left = str_pad(' ', $leftCols);
+
+
+        $sign = ($this->dollarSign ? '$ ' : '$ ');
+        $right2 = str_pad($this->name, $rightCols, ' ', STR_PAD_LEFT);
+        $right = str_pad($sign . $this->price, $rightCols, ' ', STR_PAD_LEFT);
+
+        return "$left$right2$right\n";
+    }
+
+    public function __toString()
+    {
+        return $this->getAsString();
     }
 
 }
