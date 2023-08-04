@@ -349,12 +349,12 @@ class ProductController extends Controller
                     $cPSC = substr($barcode, 1, -17);
 
 
-                    //Primero verificamos si el código del proveedor, pertenece a un producto de St Clara
-                    $product = Product::where('codigo_proveedor', $cPSC)->first();
+                    //Primero verificamos si el código del proveedor, pertenece a un producto de Nutry Pollo
+                    $product = Product::where('codigo_proveedor', $cPNP)->first();
 
-                    //Si no se obtuvo ningún resultado, ahora verificamos el código del proveedor de Nutry Pollo
+                    //Si no se obtuvo ningún resultado, ahora verificamos el código del proveedor de St Clara
                     if(!$product) {
-                        $product = Product::where('codigo_proveedor', $cPNP)->first();
+                        $product = Product::where('codigo_proveedor', $cPSC)->first();
 
                         //Si no se encontró ninguna coincidencia de ambos proveedores, enviamos una respuesta
                         if(!$product){
@@ -363,7 +363,7 @@ class ProductController extends Controller
                             "message" => "Producto no encontrado",
                             ], 201);
                         }
-                            //Si se encontró un producto de Nutry pollo, enviamos una respuesta en formato JSON
+                            //Si se encontró un producto de St Clara, enviamos una respuesta en formato JSON
                             return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
@@ -374,7 +374,7 @@ class ProductController extends Controller
 
                     } else {
 
-                        //Si se encontró un producto de St Clara, enviamos una respuesta en formato JSON
+                        //Si se encontró un producto de Nutry Pollo, enviamos una respuesta en formato JSON
                           return response()->json([
                             "status" => true,
                             "message" => "Datos encontrados con exito",
