@@ -490,7 +490,7 @@ class TicketController extends Controller
     public function ticketPrint(Request $request)
     {
 
-        $connector = new NetworkPrintConnector("192.168.100.175", 9100);
+        $connector = new NetworkPrintConnector("192.168.100.55", 9100);
         // dd($connector);
 
         /* Information for the receipt */
