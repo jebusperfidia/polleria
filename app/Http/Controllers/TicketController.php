@@ -489,44 +489,44 @@ class TicketController extends Controller
 
     public function ticketPrint(Request $request)
     {
-
         $connector = new NetworkPrintConnector("192.168.100.55", 9100);
         // dd($connector);
-
+        
         /* Information for the receipt */
         $titles = new item1('PRODUCTO', 'KILOS', 'COSTO', 'IMPORTE');
-
-        $items = [];
-
-        foreach ($request->details as $value) {
-            array_push(
-                $items,
-                new item2(wordwrap($value['nombreProducto'], 15, "\n", false), $value['kilos'], $value['costo_kilo'], $value['subtotal'])
-            );
-        }
-
-        $tipo = $request->ticket['tipo'] == 1 ? 'Entrada' : 'Salida';
-
-        $total = new item3('Total', $request->ticket['total'], true);
-        /* Date is kept the same for testing */
-        // $date = date('l jS \of F Y h:i:s A');
-        date_default_timezone_set('America/Mexico_City');
-        $date = date("d-m-Y h:i:s");
-        // $date = "Monday 6th of April 2015 02:56:25 PM";
-        /* Print a "Hello world" receipt" */
-        $printer = new Printer($connector);
-
-
-        /* Start the printer */
-
-        /* Name of shop */
-        $printer->setJustification(Printer::JUSTIFY_CENTER);
-        $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
-        $printer->text("POLLERIA GARCIA.\n");
-        $printer->selectPrintMode();
-        $printer->text("PONTIGFICA, LEÓN GTO.\n");
-        $printer->feed();
-
+        
+        // $items = [];
+        
+        //foreach ($request->details as $value) {
+            //  array_push(
+                //    $items,
+                //  new item2(wordwrap($value['nombreProducto'], 15, "\n", false), $value['kilos'], $value['costo_kilo'], $value['subtotal'])
+                // );
+                // }
+                
+                $tipo = $request->ticket['tipo'] == 1 ? 'Entrada' : 'Salida';
+                
+                $total = new item3('Total', $request->ticket['total'], true);
+                /* Date is kept the same for testing */
+                // $date = date('l jS \of F Y h:i:s A');
+                date_default_timezone_set('America/Mexico_City');
+                $date = date("d-m-Y h:i:s");
+                // $date = "Monday 6th of April 2015 02:56:25 PM";
+                /* Print a "Hello world" receipt" */
+                $printer = new Printer($connector);
+                
+                
+                /* Start the printer */
+                
+                /* Name of shop */
+                $printer->setJustification(Printer::JUSTIFY_CENTER);
+                $printer->selectPrintMode(Printer::MODE_DOUBLE_WIDTH);
+                $printer->text("POLLERIA GARCIA.\n");
+                $printer->selectPrintMode();
+                $printer->text("PONTIFICIA, LEÓN GTO.\n");
+                $printer->feed();
+                
+            
 
         /* Title of receipt */
         $printer->setEmphasis(true);
@@ -540,11 +540,13 @@ class TicketController extends Controller
         $printer->text($titles->getAsTitles(32));
         $printer->feed();
 
+
         /* Items */
         foreach ($request->details as $value) {
             $producto = $value['nombreProducto'];
             $printer -> text("$producto\n");
-            $line = sprintf('%-13.40s %3.0f %-3.40s %9.40s %-2.40s %13.40s', '', $value['kilos'], 'x', $value['costo_kilo'], '=', $value['subtotal']);
+            $line = sprintf('%-13.40s %3.40s %-3.40s %9.40s %-2.40s %10.40s', '',$value['kilos'], 'x', $value['costo_kilo'], '=', $value['subtotal']);
+            //dd($line);
             $printer -> text("$line\n");
         }
 
